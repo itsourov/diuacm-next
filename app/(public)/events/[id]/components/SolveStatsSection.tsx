@@ -36,27 +36,6 @@ export default function SolveStatsSection({
       (a.user.username > b.user.username ? 1 : -1); // Then alphabetically by username
   });
 
-  const getRankBadge = (index: number) => {
-    switch (index) {
-      case 0:
-        return {
-          icon: Trophy,
-          className: "text-amber-500 bg-amber-50 dark:bg-amber-900/20"
-        };
-      case 1:
-        return {
-          icon: Award,
-          className: "text-gray-500 bg-gray-50 dark:bg-gray-900/20"
-        };
-      case 2:
-        return {
-          icon: Star,
-          className: "text-amber-600 bg-amber-50/50 dark:bg-amber-900/20"
-        };
-      default:
-        return null;
-    }
-  };
 
   return (
     <div className="space-y-8">

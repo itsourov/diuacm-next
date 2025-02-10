@@ -63,7 +63,7 @@ export default function EventCountdown({
 
     const timer = setInterval(calculateTimeLeft, 1000);
     return () => clearInterval(timer);
-  }, [startTime, endTime]);
+  }, [startTime, endTime, status]);
 
   if (!timeLeft) return null;
 

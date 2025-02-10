@@ -11,9 +11,9 @@ export default function EventNotFound() {
             Event Not Found
           </h1>
           <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-            The event you're looking for doesn't exist or has been removed.
+            The event you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
-          <Link 
+          <Link
             href="/events"
             className="inline-flex items-center px-6 py-3 rounded-xl
               bg-blue-600 hover:bg-blue-700 

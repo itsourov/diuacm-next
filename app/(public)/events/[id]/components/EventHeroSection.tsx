@@ -1,6 +1,5 @@
 "use client";
 
-import { Event } from "@prisma/client";
 import { Clock, Calendar, Timer, Users } from "lucide-react";
 import { DateTime } from "@/lib/utils/datetime";
 
