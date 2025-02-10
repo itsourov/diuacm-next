@@ -5,20 +5,22 @@ import { Clock, Calendar, Timer, Users } from "lucide-react";
 import { DateTime } from "@/lib/utils/datetime";
 
 interface EventHeroSectionProps {
-  event: Event;
+  event: {
+    id: bigint;
+    title: string;
+    description: string | null;
+    type: 'contest' | 'class' | 'other';
+    startingAt: Date;
+    endingAt: Date;
+  };
   attendeeCount: number;
 }
 
 export default function EventHeroSection({ event, attendeeCount }: EventHeroSectionProps) {
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-  };
+  // Calculate duration in minutes
+  const durationInMinutes = Math.round(
+    (new Date(event.endingAt).getTime() - new Date(event.startingAt).getTime()) / (1000 * 60)
+  );
 
   return (
     <div className="relative py-12 bg-white dark:bg-gray-900">
@@ -35,7 +37,7 @@ export default function EventHeroSection({ event, attendeeCount }: EventHeroSect
             text-blue-600 dark:text-blue-400 font-medium">
             <div className="flex items-center gap-2 text-sm">
               <span className="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse"/>
-              {event.type}
+              {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
             </div>
           </div>
 
@@ -58,7 +60,10 @@ export default function EventHeroSection({ event, attendeeCount }: EventHeroSect
               <Calendar className="w-8 h-8 text-blue-500 mb-2"/>
               <h3 className="font-bold text-gray-900 dark:text-white">Date</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {formatDate(event.startingAt).split(',')[0]}
+                {DateTime.formatDisplay(event.startingAt, { 
+                  format: 'local',
+                  includeTimezone: false 
+                }).split(',')[0]}
               </p>
             </div>
 
@@ -66,9 +71,10 @@ export default function EventHeroSection({ event, attendeeCount }: EventHeroSect
               <Clock className="w-8 h-8 text-purple-500 mb-2"/>
               <h3 className="font-bold text-gray-900 dark:text-white">Time</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {formatDate(event.startingAt).split(',')[1].trim()} - {
-                  formatDate(event.endingAt).split(',')[1].trim()
-                }
+                {DateTime.formatDateRange(
+                  new Date(event.startingAt),
+                  new Date(event.endingAt)
+                )}
               </p>
             </div>
 
@@ -76,7 +82,10 @@ export default function EventHeroSection({ event, attendeeCount }: EventHeroSect
               <Timer className="w-8 h-8 text-green-500 mb-2"/>
               <h3 className="font-bold text-gray-900 dark:text-white">Duration</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {Math.round((new Date(event.endingAt).getTime() - new Date(event.startingAt).getTime()) / (1000 * 60))} minutes
+                {durationInMinutes >= 60 
+                  ? `${Math.floor(durationInMinutes / 60)}h ${durationInMinutes % 60}m`
+                  : `${durationInMinutes}m`
+                }
               </p>
             </div>
 
@@ -84,7 +93,7 @@ export default function EventHeroSection({ event, attendeeCount }: EventHeroSect
               <Users className="w-8 h-8 text-amber-500 mb-2"/>
               <h3 className="font-bold text-gray-900 dark:text-white">Attendees</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {attendeeCount} participants
+                {attendeeCount} participant{attendeeCount !== 1 ? 's' : ''}
               </p>
             </div>
           </div>

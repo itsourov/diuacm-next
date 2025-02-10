@@ -4,30 +4,30 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AttendanceSection from "./AttendanceSection";
 import SolveStatsSection from "./SolveStatsSection";
 import { cn } from "@/lib/utils";
+import { Event, SolveStat } from "@prisma/client";
+
+interface User {
+  id: string;
+  name: string;
+  username: string;
+  image: string | null;
+}
+
+interface EventWithRelations extends Event {
+  eventUsers: Array<{
+    user: User;
+  }>;
+  solveStats: Array<SolveStat & {
+    user: User;
+  }>;
+}
 
 interface EventTabsProps {
-  event: Event & {
-    eventUsers: Array<{
-      user: {
-        id: string;
-        name: string;
-        username: string;
-        image: string | null;
-      };
-    }>;
-    solveStats: Array<{
-      user: {
-        id: string;
-        name: string;
-        username: string;
-        image: string | null;
-      };
-    } & SolveStat>;
-  };
+  event: EventWithRelations;
   hasAttendance: boolean;
   currentUser: { id: string; name: string } | null;
   currentUserName?: string;
-  userSolveStat: SolveStat | null;
+  userSolveStat: (SolveStat & { user: User }) | null;
   defaultTab?: "attendance" | "solve-stats";
 }
 

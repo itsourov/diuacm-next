@@ -11,17 +11,19 @@ import UserAvatar from "@/components/UserAvatar";
 import { DateTime } from "@/lib/utils/datetime";
 import { cn } from "@/lib/utils";
 
+type EventWithUsers = Event & {
+  eventUsers: Array<{
+    user: {
+      id: string;
+      name: string;
+      username: string;
+      image: string | null;
+    };
+  }>;
+};
+
 interface AttendanceSectionProps {
-  event: Event & {
-    eventUsers: Array<{
-      user: {
-        id: string;
-        name: string;
-        username: string;
-        image: string | null;
-      };
-    }>;
-  };
+  event: EventWithUsers;
   hasAttendance: boolean;
   currentUser: { id: string } | null;
 }
@@ -35,6 +37,7 @@ export default function AttendanceSection({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  // Calculate attendance window (15 minutes before start to 15 minutes after end)
   const now = DateTime.getCurrentUTCTime();
   const startTime = new Date(event.startingAt);
   const endTime = new Date(event.endingAt);
@@ -73,7 +76,10 @@ export default function AttendanceSection({
 
     if (now < attendanceStartTime) {
       return {
-        message: `Attendance opens at ${DateTime.formatDisplay(attendanceStartTime)}`,
+        message: `Attendance opens at ${DateTime.formatDisplay(attendanceStartTime, {
+          format: 'local',
+          includeTimezone: true
+        })}`,
         icon: Timer,
         className: "bg-blue-50 dark:bg-blue-900/20 text-blue-900 dark:text-blue-100"
       };

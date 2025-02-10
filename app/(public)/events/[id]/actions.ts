@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { DateTime } from "@/lib/utils/datetime";
 
 export async function giveAttendance(eventId: string, password: string) {
   try {
@@ -29,7 +30,7 @@ export async function giveAttendance(eventId: string, password: string) {
     }
 
     // Check attendance time window
-    const now = new Date();
+    const now = DateTime.getCurrentUTCTime();
     const attendanceStartTime = new Date(event.startingAt);
     const attendanceEndTime = new Date(event.endingAt);
     attendanceStartTime.setMinutes(attendanceStartTime.getMinutes() - 15);

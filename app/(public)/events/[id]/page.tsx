@@ -4,8 +4,8 @@ import { auth } from "@/lib/auth";
 import EventHeroSection from "./components/EventHeroSection";
 import EventCountdown from "./components/EventCountdown";
 import EventTabs from "./components/EventTabs";
-import StatusBar from "./components/StatusBar";
 import { Metadata } from "next";
+import { DateTime } from "@/lib/utils/datetime";
 
 interface EventPageProps {
   params: { id: string };
@@ -47,7 +47,7 @@ async function getEvent(id: string) {
 }
 
 function calculateInitialTimeLeft(startTime: Date, endTime: Date) {
-  const now = new Date();
+  const now = DateTime.getCurrentUTCTime();
   let targetDate: Date;
   let status: "upcoming" | "running" | "ended";
 
@@ -95,75 +95,55 @@ export default async function EventPage({ params }: EventPageProps) {
 
   // Get attendance status
   const hasAttendance = session?.user
-      ? event.eventUsers.some((eu) => eu.user.id === session?.user?.id)
-      : false;
+    ? event.eventUsers.some((eu) => eu.user.id === session?.user?.id)
+    : false;
 
   // Get user's solve stats
   const userSolveStat = session?.user
-      ? event.solveStats.find((ss) => ss.user.id === session?.user?.id)
-      : null;
-
-  // Calculate initial time values for hydration
-  const initialTime = "2025-02-10 20:56:20"; // Exact format as specified
+    ? event.solveStats.find((ss) => ss.user.id === session?.user?.id)
+    : null;
 
   const { timeLeft: initialTimeLeft, status: initialStatus } = calculateInitialTimeLeft(
-      new Date(event.startingAt),
-      new Date(event.endingAt)
+    new Date(event.startingAt),
+    new Date(event.endingAt)
   );
 
-  // Format event dates
-  const formattedStartDate = new Date(event.startingAt)
-      .toISOString()
-      .replace('T', ' ')
-      .split('.')[0];
-
-  const formattedEndDate = new Date(event.endingAt)
-      .toISOString()
-      .replace('T', ' ')
-      .split('.')[0];
-
   return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        {/* Status Bar */}
-        <StatusBar
-            initialTime={initialTime}
-            username={session?.user?.name || 'itsourov'}
-        />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Hero Section */}
+      <EventHeroSection
+        event={{
+          ...event,
+          startingAt: new Date(event.startingAt),
+          endingAt: new Date(event.endingAt),
+        }}
+        attendeeCount={event.eventUsers.length}
+      />
 
-        {/* Hero Section */}
-        <EventHeroSection
-            event={{
-              ...event,
-              startingAt: formattedStartDate,
-              endingAt: formattedEndDate,
-            }}
-            attendeeCount={event.eventUsers.length}
-        />
-
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="space-y-8">
-            {/* Countdown Section - Only show if event hasn't ended */}
-            {new Date() < new Date(event.endingAt) && (
-                <EventCountdown
-                    startTime={formattedStartDate}
-                    endTime={formattedEndDate}
-                    initialTimeLeft={initialTimeLeft}
-                    initialStatus={initialStatus}
-                />
-            )}
-
-            {/* Tabs Section */}
-            <EventTabs
-                event={event}
-                hasAttendance={hasAttendance}
-                currentUser={session?.user}
-                currentUserName={session?.user?.name}
-                userSolveStat={userSolveStat}
-                defaultTab={event.openForAttendance ? "attendance" : "solve-stats"}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          {/* Countdown Section - Only show if event hasn't ended */}
+          {DateTime.getCurrentUTCTime() < new Date(event.endingAt) && (
+            <EventCountdown
+              startTime={event.startingAt.toISOString()}
+              endTime={event.endingAt.toISOString()}
+              initialTimeLeft={initialTimeLeft}
+              initialStatus={initialStatus}
             />
-          </div>
+          )}
+
+          {/* Tabs Section */}
+          <EventTabs
+            event={event}
+            hasAttendance={hasAttendance}
+            currentUser={session?.user}
+            currentUserName={session?.user?.name}
+            userSolveStat={userSolveStat}
+            defaultTab={event.openForAttendance ? "attendance" : "solve-stats"}
+          />
         </div>
       </div>
+    </div>
   );
 }

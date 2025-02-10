@@ -1,11 +1,10 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import StatusBar from "./components/StatusBar";
 
 export default function EventLoading() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <StatusBar />
-      
+
+
       {/* Hero Section Skeleton */}
       <div className="relative py-12 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
