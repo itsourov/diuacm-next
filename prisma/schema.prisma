@@ -1,59 +1,159 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// User model with new fields
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id                BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  title             String          @db.VarChar(255)
+  description       String?         @db.VarChar(255)
+  status            EventStatus     @default(draft)
+  startingAt        DateTime        @map("starting_at")
+  endingAt          DateTime        @map("ending_at")
+  eventLink         String?         @map("event_link") @db.VarChar(255)
+  eventPassword     String?         @map("event_password") @db.VarChar(255)
+  openForAttendance Boolean         @map("open_for_attendance")
+  type              EventType       @default(contest)
+  attendanceScope   AttendanceScope @default(open_for_all) @map("attendance_scope")
+  createdAt         DateTime?       @map("created_at")
+  updatedAt         DateTime?       @map("updated_at")
+
+  // Relations
+  eventRankLists EventRankList[]
+  eventUsers     EventUser[]
+  solveStats     SolveStat[]
+
+  @@map("events")
+}
+
+model EventRankList {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  eventId    BigInt    @map("event_id") @db.UnsignedBigInt
+  rankListId BigInt    @map("rank_list_id") @db.UnsignedBigInt
+  weight     Float     @default(1)
+  createdAt  DateTime? @map("created_at")
+  updatedAt  DateTime? @map("updated_at")
+
+  // Relations
+  event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  rankList RankList @relation(fields: [rankListId], references: [id], onDelete: Cascade)
+
+  @@map("event_rank_list")
+}
+
+model EventUser {
+  id        BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  userId    BigInt    @map("user_id") @db.UnsignedBigInt
+  eventId   BigInt    @map("event_id") @db.UnsignedBigInt
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime? @map("updated_at")
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("event_user")
+}
+
+model RankList {
+  id              BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title           String    @db.VarChar(255)
+  session         String    @db.VarChar(255)
+  description     String?   @db.VarChar(255)
+  weightOfUpsolve Float     @default(0.25) @map("weight_of_upsolve")
+  createdAt       DateTime? @map("created_at")
+  updatedAt       DateTime? @map("updated_at")
+
+  // Relations
+  eventRankLists EventRankList[]
+  rankListUsers  RankListUser[]
+
+  @@map("rank_lists")
+}
+
+model RankListUser {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  userId     BigInt    @map("user_id") @db.UnsignedBigInt
+  rankListId BigInt    @map("rank_list_id") @db.UnsignedBigInt
+  score      Float     @default(0)
+  createdAt  DateTime? @map("created_at")
+  updatedAt  DateTime? @map("updated_at")
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rankList RankList @relation(fields: [rankListId], references: [id], onDelete: Cascade)
+
+  @@map("rank_list_user")
+}
+
+model SolveStat {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  userId       BigInt    @map("user_id") @db.UnsignedBigInt
+  eventId      BigInt    @map("event_id") @db.UnsignedBigInt
+  solveCount   BigInt    @map("solve_count") @db.UnsignedBigInt
+  upsolveCount BigInt    @map("upsolve_count") @db.UnsignedBigInt
+  isPresent    Boolean   @default(false) @map("is_present")
+  createdAt    DateTime? @map("created_at")
+  updatedAt    DateTime? @map("updated_at")
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@map("solve_stats")
+}
+
 model User {
-  id               String              @id @default(cuid())
-  name             String
-  email            String              @unique
-  username         String              @unique
-  emailVerified    DateTime?
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name             String    @db.VarChar(255)
+  email            String    @unique @db.VarChar(255)
+  username         String    @unique @db.VarChar(255)
+  emailVerified    DateTime? @map("email_verified_at")
   image            String?
-  accounts         Account[]
-  sessions         Session[]
-  password         String?
-  gender           String?
-  phone            String?
-  // New fields for coding platforms
-  codeforcesHandle String?
-  atcoderHandle    String?
-  vjudgeHandle     String?
-  // New fields for university information
-  startingSemester String?
-  department       String?
-  studentId        String?
-  // Existing relations
-  ranklists        UsersOnRanklists[]
-  contestStats     ContestStatOfUser[]
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  password         String?   @db.VarChar(255)
+  gender           Gender?
+  phone            String?   @db.VarChar(255)
+  codeforcesHandle String?   @map("codeforces_handle") @db.VarChar(255)
+  atcoderHandle    String?   @map("atcoder_handle") @db.VarChar(255)
+  vjudgeHandle     String?   @map("vjudge_handle") @db.VarChar(255)
+  startingSemester String?   @map("starting_semester") @db.VarChar(255)
+  department       String?   @db.VarChar(255)
+  studentId        String?   @map("student_id") @db.VarChar(255)
+  maxCfRating      Int?      @map("max_cf_rating") @db.UnsignedInt
+  rememberToken    String?   @map("remember_token") @db.VarChar(100)
+  createdAt        DateTime? @map("created_at")
+  updatedAt        DateTime? @map("updated_at")
+
+  // Relations
+  eventUsers    EventUser[]
+  rankListUsers RankListUser[]
+  solveStats    SolveStat[]
+  accounts      Account[]
+  sessions      Session[]
 
   @@map("users")
 }
 
-// Rest of the models remain the same
 model Account {
-  id                String   @id @default(cuid())
-  userId            String
+  id                String  @id @default(cuid())
+  userId            BigInt  @map("user_id") @db.UnsignedBigInt
   type              String
   provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -61,169 +161,43 @@ model Account {
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
+  sessionToken String   @unique @map("session_token")
+  userId       BigInt   @map("user_id") @db.UnsignedBigInt
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 
   @@map("sessions")
 }
 
 model VerificationToken {
   identifier String
-  token      String   @unique
+  token      String
   expires    DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
-  @@map("verificationtokens")
+  @@map("verification_tokens")
 }
 
 enum EventStatus {
-  DRAFT
-  PUBLISHED
-  PRIVATE
+  published
+  draft
+  private
 }
 
 enum EventType {
-  CLASS
-  CONTEST
-  MEETING
-}
-
-model Event {
-  id                String              @id @default(cuid())
-  title             String
-  description       String?
-  status            EventStatus         @default(DRAFT)
-  startDateTime     DateTime
-  endDateTime       DateTime
-  contestLink       String?
-  contestPassword   String?
-  openForAttendance Boolean             @default(false)
-  type              EventType
-  weight            Float               @default(1.0)
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  ranklists         EventsOnRanklists[]
-  contestStats      ContestStatOfUser[]
-  attendanceScope   AttendanceScope     @default(PUBLIC)
+  contest
+  class
+  other
 }
 
 enum AttendanceScope {
-  PUBLIC
-  ONLY_GIRLS
-  JUNIOR_PROGRAMMERS
+  open_for_all       @map("open_for_all")
+  only_girls         @map("only_girls")
+  junior_programmers @map("junior_programmers")
 }
 
-model Tracker {
-  id          String                @id @default(cuid())
-  title       String
-  description String?
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
-  ranklists   TrackersOnRanklists[]
-}
-
-model Ranklist {
-  id        String                @id @default(cuid())
-  title     String
-  keyword   String                @unique
-  createdAt DateTime              @default(now())
-  updatedAt DateTime              @updatedAt
-  users     UsersOnRanklists[]
-  events    EventsOnRanklists[]
-  trackers  TrackersOnRanklists[]
-}
-
-model TrackersOnRanklists {
-  tracker    Tracker  @relation(fields: [trackerId], references: [id], onDelete: Cascade)
-  trackerId  String
-  ranklist   Ranklist @relation(fields: [ranklistId], references: [id], onDelete: Cascade)
-  ranklistId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@id([trackerId, ranklistId])
-}
-
-model UsersOnRanklists {
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
-  ranklist   Ranklist @relation(fields: [ranklistId], references: [id], onDelete: Cascade)
-  ranklistId String
-  score      Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@id([userId, ranklistId])
-}
-
-model EventsOnRanklists {
-  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId    String
-  ranklist   Ranklist @relation(fields: [ranklistId], references: [id], onDelete: Cascade)
-  ranklistId String
-  weight     Int      @default(1)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@id([eventId, ranklistId])
-}
-
-model ContestStatOfUser {
-  id           String   @id @default(uuid())
-  userId       String
-  eventId      String
-  solveCount   Int
-  upsolveCount Int
-  isAbsent     Boolean
-  note         String?
-  lastUpdated  DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, eventId])
-}
-
-model Gallery {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  images      Image[]
-}
-
-model Image {
-  id        String   @id @default(cuid())
-  url       String
-  key       String
-  alt       String?
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  gallery   Gallery  @relation(fields: [galleryId], references: [id], onDelete: Cascade)
-  galleryId String
-}
-
-model BlogPost {
-  id            String         @id @default(cuid())
-  title         String
-  content       String
-  author        String
-  status        BlogPostStatus @default(DRAFT)
-  publishedAt   DateTime?
-  featuredImage String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-}
-
-enum BlogPostStatus {
-  DRAFT
-  PUBLISHED
-  PRIVATE
+enum Gender {
+  male
+  female
+  other
 }
