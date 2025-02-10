@@ -166,7 +166,7 @@ model Session {
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("sessions")
+  @@map("sessions_next")
 }
 
 model VerificationToken {

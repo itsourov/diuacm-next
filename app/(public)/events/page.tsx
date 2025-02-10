@@ -1,3 +1,4 @@
+// app/(public)/events/page.tsx
 import {Suspense} from 'react';
 import {getEvents} from './actions';
 import EventSearchForm from './components/EventSearchForm';

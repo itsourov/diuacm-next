@@ -1,3 +1,4 @@
+// app/(public)/events/actions.ts
 'use server';
 
 import {prisma} from '@/lib/prisma';
