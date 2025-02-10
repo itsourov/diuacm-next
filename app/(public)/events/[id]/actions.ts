@@ -3,30 +3,52 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DateTime } from "@/lib/utils/datetime";
+import { revalidatePath } from "next/cache";
 
-export async function giveAttendance(eventId: string, password: string) {
+interface AttendanceResponse {
+  success: boolean;
+  message?: string;
+}
+
+export async function giveAttendance(eventId: string, password: string): Promise<AttendanceResponse> {
   try {
     const session = await auth();
-    if (!session?.user) {
-      return { success: false, message: "You must be logged in" };
+
+    // Early return if no session or user
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: "You must be logged in"
+      };
     }
+
+    const userId = session.user.id;
 
     const event = await prisma.event.findUnique({
       where: { id: BigInt(eventId) },
     });
 
     if (!event) {
-      return { success: false, message: "Event not found" };
+      return {
+        success: false,
+        message: "Event not found"
+      };
     }
 
     // Verify event password
     if (event.eventPassword !== password) {
-      return { success: false, message: "Invalid event password" };
+      return {
+        success: false,
+        message: "Invalid event password"
+      };
     }
 
     // Check if attendance is open
     if (!event.openForAttendance) {
-      return { success: false, message: "Attendance is not open for this event" };
+      return {
+        success: false,
+        message: "Attendance is not open for this event"
+      };
     }
 
     // Check attendance time window
@@ -39,7 +61,7 @@ export async function giveAttendance(eventId: string, password: string) {
     if (now < attendanceStartTime || now > attendanceEndTime) {
       return {
         success: false,
-        message: "Attendance can only be given during the event time window",
+        message: `Attendance can only be given from ${DateTime.formatDisplay(attendanceStartTime)} to ${DateTime.formatDisplay(attendanceEndTime)}`,
       };
     }
 
@@ -47,7 +69,7 @@ export async function giveAttendance(eventId: string, password: string) {
     const existingAttendance = await prisma.eventUser.findFirst({
       where: {
         eventId: BigInt(eventId),
-        userId: session.user.id,
+        userId: userId,
       },
     });
 
@@ -58,17 +80,46 @@ export async function giveAttendance(eventId: string, password: string) {
       };
     }
 
-    // Create attendance record
+    // Create attendance record with the guaranteed non-null userId
     await prisma.eventUser.create({
       data: {
         eventId: BigInt(eventId),
-        userId: session.user.id,
+        userId: userId, // Now TypeScript knows this is a string
       },
     });
 
-    return { success: true };
+    // Update solve stats if it exists, create if it doesn't
+    await prisma.solveStat.upsert({
+      where: {
+        userId_eventId: {
+          userId: userId,
+          eventId: BigInt(eventId),
+        },
+      },
+      update: {
+        isPresent: true,
+      },
+      create: {
+        userId: userId,
+        eventId: BigInt(eventId),
+        solveCount: BigInt(0),
+        upsolveCount: BigInt(0),
+        isPresent: true,
+      },
+    });
+
+    // Revalidate the event page to show updated attendance
+    revalidatePath(`/events/${eventId}`);
+
+    return {
+      success: true,
+      message: "Attendance recorded successfully"
+    };
   } catch (error) {
     console.error("Error giving attendance:", error);
-    return { success: false, message: "Something went wrong" };
+    return {
+      success: false,
+      message: "An unexpected error occurred"
+    };
   }
 }

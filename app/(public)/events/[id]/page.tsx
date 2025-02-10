@@ -6,12 +6,39 @@ import EventCountdown from "./components/EventCountdown";
 import EventTabs from "./components/EventTabs";
 import { Metadata } from "next";
 import { DateTime } from "@/lib/utils/datetime";
+import { Event, SolveStat } from "@prisma/client";
 
 interface EventPageProps {
   params: { id: string };
 }
 
-async function getEvent(id: string) {
+interface User {
+  id: string;
+  name: string;
+  username: string;
+  image: string | null;
+}
+
+interface EventUser {
+  user: User;
+}
+
+interface SolveStatWithUser extends SolveStat {
+  user: User;
+}
+
+interface EventWithRelations extends Event {
+  eventUsers: EventUser[];
+  solveStats: SolveStatWithUser[];
+}
+
+// Define a type for our current user
+interface CurrentUser {
+  id: string;
+  name: string;
+}
+
+async function getEvent(id: string): Promise<EventWithRelations> {
   const event = await prisma.event.findUnique({
     where: { id: BigInt(id) },
     include: {
@@ -93,14 +120,23 @@ export default async function EventPage({ params }: EventPageProps) {
     auth(),
   ]);
 
+  // Create a properly typed current user object, ensuring both id and name exist
+  const currentUser: CurrentUser | null =
+    session?.user?.id && session.user.name
+      ? {
+        id: session.user.id,
+        name: session.user.name,
+      }
+      : null;
+
   // Get attendance status
-  const hasAttendance = session?.user
-    ? event.eventUsers.some((eu) => eu.user.id === session?.user?.id)
+  const hasAttendance = currentUser
+    ? event.eventUsers.some((eu) => eu.user.id === currentUser.id)
     : false;
 
-  // Get user's solve stats
-  const userSolveStat = session?.user
-    ? event.solveStats.find((ss) => ss.user.id === session?.user?.id)
+  // Get user's solve stats with proper typing
+  const userSolveStat = currentUser
+    ? event.solveStats.find((ss) => ss.user.id === currentUser.id) || null
     : null;
 
   const { timeLeft: initialTimeLeft, status: initialStatus } = calculateInitialTimeLeft(
@@ -113,7 +149,10 @@ export default async function EventPage({ params }: EventPageProps) {
       {/* Hero Section */}
       <EventHeroSection
         event={{
-          ...event,
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          type: event.type,
           startingAt: new Date(event.startingAt),
           endingAt: new Date(event.endingAt),
         }}
@@ -137,8 +176,8 @@ export default async function EventPage({ params }: EventPageProps) {
           <EventTabs
             event={event}
             hasAttendance={hasAttendance}
-            currentUser={session?.user}
-            currentUserName={session?.user?.name}
+            currentUser={currentUser}
+            currentUserName={currentUser?.name}
             userSolveStat={userSolveStat}
             defaultTab={event.openForAttendance ? "attendance" : "solve-stats"}
           />
