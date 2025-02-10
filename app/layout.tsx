@@ -5,6 +5,7 @@ import {ThemeProvider} from '@/providers/ThemeProvider';
 import {Toaster} from "@/components/ui/toaster";
 import {Toaster as Toaster2} from 'sonner';
 import {SessionProvider} from "next-auth/react";
+import Navbar from "@/components/Navbar";
 
 
 const inter = Inter({subsets: ['latin']});
@@ -29,6 +30,7 @@ export default function RootLayout({
             disableTransitionOnChange
         >
             <SessionProvider>
+                <Navbar/>
                 <main className="pt-16">
                     {children}
                 </main>
