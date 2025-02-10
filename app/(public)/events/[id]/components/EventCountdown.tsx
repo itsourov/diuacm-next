@@ -1,35 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { DateTime } from "@/lib/utils/datetime";
+import { Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface EventCountdownProps {
-  startTime: Date;
-  endTime: Date;
-  className?: string;
-}
-
-export default function EventCountdown({
-  startTime,
-  endTime,
-  className,
-}: EventCountdownProps) {
-  const [timeLeft, setTimeLeft] = useState<{
+  startTime: string; // ISO string
+  endTime: string;   // ISO string
+  initialTimeLeft: {
     days: number;
     hours: number;
     minutes: number;
     seconds: number;
-  } | null>(null);
+  } | null;
+  initialStatus: "upcoming" | "running" | "ended";
+}
 
-  const [status, setStatus] = useState<"upcoming" | "running" | "ended">("ended");
+export default function EventCountdown({
+                                         startTime,
+                                         endTime,
+                                         initialTimeLeft,
+                                         initialStatus,
+                                       }: EventCountdownProps) {
+  const [timeLeft, setTimeLeft] = useState(initialTimeLeft);
+  const [status, setStatus] = useState(initialStatus);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const now = DateTime.getCurrentUTCTime();
+      const now = new Date();
       let targetDate: Date;
-      let newStatus: "upcoming" | "running" | "ended";
+      let newStatus = status;
 
       if (now < new Date(startTime)) {
         targetDate = new Date(startTime);
@@ -44,9 +44,8 @@ export default function EventCountdown({
       }
 
       setStatus(newStatus);
-
       const difference = targetDate.getTime() - now.getTime();
-      
+
       if (difference <= 0) {
         setTimeLeft(null);
         return;
@@ -60,9 +59,7 @@ export default function EventCountdown({
       });
     };
 
-    calculateTimeLeft();
     const timer = setInterval(calculateTimeLeft, 1000);
-
     return () => clearInterval(timer);
   }, [startTime, endTime]);
 
@@ -71,51 +68,64 @@ export default function EventCountdown({
   const statusConfig = {
     upcoming: {
       text: "Starts in",
-      className: "border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10",
+      bgClass: "bg-blue-500/10 dark:bg-blue-900/20",
+      textClass: "text-blue-600 dark:text-blue-400",
     },
     running: {
       text: "Ends in",
-      className: "border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10",
+      bgClass: "bg-green-500/10 dark:bg-green-900/20",
+      textClass: "text-green-600 dark:text-green-400",
     },
     ended: {
       text: "Event ended",
-      className: "border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/10",
+      bgClass: "bg-gray-500/10 dark:bg-gray-900/20",
+      textClass: "text-gray-600 dark:text-gray-400",
     },
   };
 
   return (
-    <Card
-      className={cn(
-        "border",
-        statusConfig[status].className,
-        className
-      )}
-    >
-      <div className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-          {statusConfig[status].text}
-        </h2>
-        <div className="grid grid-cols-4 gap-4">
+      <div className={cn(
+          "rounded-2xl p-6 sm:p-8",
+          "bg-white dark:bg-gray-800",
+          "shadow-xl hover:shadow-2xl transition-all duration-300",
+          "border border-gray-200/50 dark:border-gray-700/50"
+      )}>
+        <div className="flex items-center gap-4 mb-6">
+          <Timer className={cn(
+              "w-8 h-8",
+              statusConfig[status].textClass
+          )} />
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            {statusConfig[status].text}
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           {[
             { label: "Days", value: timeLeft.days },
             { label: "Hours", value: timeLeft.hours },
             { label: "Minutes", value: timeLeft.minutes },
             { label: "Seconds", value: timeLeft.seconds },
           ].map(({ label, value }) => (
-            <div
-              key={label}
-              className="flex flex-col items-center justify-center p-4 bg-white dark:bg-gray-800/50 rounded-lg"
-            >
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {value.toString().padStart(2, "0")}
-              </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {label}
-              </span>
-            </div>
+              <div
+                  key={label}
+                  className={cn(
+                      "p-4 sm:p-6 rounded-xl text-center",
+                      statusConfig[status].bgClass
+                  )}
+              >
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">
+                  {value.toString().padStart(2, "0")}
+                </div>
+                <div className={cn(
+                    "text-sm font-medium",
+                    statusConfig[status].textClass
+                )}>
+                  {label}
+                </div>
+              </div>
           ))}
         </div>
       </div>
-    </Card>
   );
 }

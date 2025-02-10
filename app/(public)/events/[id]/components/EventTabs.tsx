@@ -1,7 +1,6 @@
 "use client";
 
-import { Event, SolveStat } from "@prisma/client";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AttendanceSection from "./AttendanceSection";
 import SolveStatsSection from "./SolveStatsSection";
 import { cn } from "@/lib/utils";
@@ -28,16 +27,8 @@ interface EventTabsProps {
   hasAttendance: boolean;
   currentUser: { id: string; name: string } | null;
   currentUserName?: string;
-  userSolveStat: (SolveStat & {
-    user: {
-      id: string;
-      name: string;
-      username: string;
-      image: string | null;
-    };
-  }) | null;
+  userSolveStat: SolveStat | null;
   defaultTab?: "attendance" | "solve-stats";
-  className?: string;
 }
 
 export default function EventTabs({
@@ -47,35 +38,42 @@ export default function EventTabs({
   currentUserName,
   userSolveStat,
   defaultTab = "solve-stats",
-  className,
 }: EventTabsProps) {
   return (
-    <Tabs defaultValue={defaultTab} className={className}>
-      <TabsList className="grid w-full grid-cols-2">
-        {event.openForAttendance && (
+    <Tabs defaultValue={defaultTab} className="space-y-8">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-2">
+        <TabsList className="grid w-full grid-cols-2 h-14 rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
+          {event.openForAttendance && (
+            <TabsTrigger 
+              value="attendance"
+              className={cn(
+                "rounded-lg text-base font-medium h-12",
+                "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800",
+                "data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400",
+                "data-[state=active]:shadow-sm",
+                "transition-all duration-200"
+              )}
+            >
+              Attendance
+            </TabsTrigger>
+          )}
           <TabsTrigger 
-            value="attendance"
+            value="solve-stats"
             className={cn(
-              "data-[state=active]:bg-gray-900 data-[state=active]:text-white",
-              "dark:data-[state=active]:bg-gray-100 dark:data-[state=active]:text-gray-900"
+              "rounded-lg text-base font-medium h-12",
+              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800",
+              "data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400",
+              "data-[state=active]:shadow-sm",
+              "transition-all duration-200"
             )}
           >
-            Attendance
+            Solve Stats
           </TabsTrigger>
-        )}
-        <TabsTrigger 
-          value="solve-stats"
-          className={cn(
-            "data-[state=active]:bg-gray-900 data-[state=active]:text-white",
-            "dark:data-[state=active]:bg-gray-100 dark:data-[state=active]:text-gray-900"
-          )}
-        >
-          Solve Stats
-        </TabsTrigger>
-      </TabsList>
-      
+        </TabsList>
+      </div>
+
       {event.openForAttendance && (
-        <TabsContent value="attendance">
+        <TabsContent value="attendance" className="mt-6">
           <AttendanceSection
             event={event}
             hasAttendance={hasAttendance}
@@ -84,7 +82,7 @@ export default function EventTabs({
         </TabsContent>
       )}
       
-      <TabsContent value="solve-stats">
+      <TabsContent value="solve-stats" className="mt-6">
         <SolveStatsSection
           solveStats={event.solveStats}
           userSolveStat={userSolveStat}
