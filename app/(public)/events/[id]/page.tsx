@@ -8,6 +8,7 @@ import EventTabs from "./components/EventTabs";
 import { Metadata } from "next";
 import { DateTime } from "@/lib/utils/datetime";
 import { Event, SolveStat } from "@prisma/client";
+import { VjudgeResultsDialog } from "./contest-result-updater/vjudge";
 
 interface EventPageProps {
   params: Promise<{ id: string }>;  // Changed to Promise
@@ -161,6 +162,17 @@ export default async function EventPage({ params }: EventPageProps) {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
+          {/* Added: Action buttons section */}
+          <div className="flex justify-end gap-4">
+            {event.type === 'contest' && event.eventLink?.includes('vjudge.net') && (
+              <VjudgeResultsDialog
+                eventId={event.id}
+                contestId={getVjudgeContestId(event.eventLink)}
+                currentUser={session?.user?.name}
+              />
+            )}
+          </div>
+
           {/* Countdown Section - Only show if event hasn't ended */}
           {DateTime.getCurrentUTCTime() < new Date(event.endingAt) && (
             <EventCountdown
@@ -184,4 +196,9 @@ export default async function EventPage({ params }: EventPageProps) {
       </div>
     </div>
   );
+}
+
+function getVjudgeContestId(url: string): string {
+  const match = url.match(/contest\/(\d+)/);
+  return match ? match[1] : "";
 }

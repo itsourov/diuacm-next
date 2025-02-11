@@ -81,7 +81,10 @@ export default function SolveStatsSection({
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               Solve Statistics ({solveStats.length})
             </h2>
+
           </div>
+
+
 
           <div className="overflow-x-auto">
             <table className="w-full">

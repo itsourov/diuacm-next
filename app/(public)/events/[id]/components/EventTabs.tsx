@@ -45,7 +45,7 @@ export default function EventTabs({
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-2">
         <TabsList className="grid w-full grid-cols-2 h-14 rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
           {event.openForAttendance && (
-            <TabsTrigger 
+            <TabsTrigger
               value="attendance"
               className={cn(
                 "rounded-lg text-base font-medium h-12",
@@ -58,7 +58,7 @@ export default function EventTabs({
               Attendance
             </TabsTrigger>
           )}
-          <TabsTrigger 
+          <TabsTrigger
             value="solve-stats"
             className={cn(
               "rounded-lg text-base font-medium h-12",
@@ -82,7 +82,7 @@ export default function EventTabs({
           />
         </TabsContent>
       )}
-      
+
       <TabsContent value="solve-stats" className="mt-6">
         <SolveStatsSection
           solveStats={event.solveStats}
