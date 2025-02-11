@@ -9,7 +9,7 @@ import { DateTime } from "@/lib/utils/datetime";
 import { Event, SolveStat } from "@prisma/client";
 
 interface EventPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;  // Changed to Promise
 }
 
 interface User {
@@ -32,7 +32,6 @@ interface EventWithRelations extends Event {
   solveStats: SolveStatWithUser[];
 }
 
-// Define a type for our current user
 interface CurrentUser {
   id: string;
   name: string;
@@ -106,7 +105,8 @@ function calculateInitialTimeLeft(startTime: Date, endTime: Date) {
 }
 
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
-  const event = await getEvent(params.id);
+  const resolvedParams = await params;  // Await params here
+  const event = await getEvent(resolvedParams.id);
 
   return {
     title: event.title,
@@ -115,12 +115,12 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
 }
 
 export default async function EventPage({ params }: EventPageProps) {
+  const resolvedParams = await params;  // Await params here
   const [event, session] = await Promise.all([
-    getEvent(params.id),
+    getEvent(resolvedParams.id),
     auth(),
   ]);
 
-  // Create a properly typed current user object, ensuring both id and name exist
   const currentUser: CurrentUser | null =
     session?.user?.id && session.user.name
       ? {
@@ -129,12 +129,10 @@ export default async function EventPage({ params }: EventPageProps) {
       }
       : null;
 
-  // Get attendance status
   const hasAttendance = currentUser
     ? event.eventUsers.some((eu) => eu.user.id === currentUser.id)
     : false;
 
-  // Get user's solve stats with proper typing
   const userSolveStat = currentUser
     ? event.solveStats.find((ss) => ss.user.id === currentUser.id) || null
     : null;
