@@ -1,4 +1,3 @@
-// components/vjudge-results-dialog.tsx
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -35,6 +34,25 @@ interface VjudgeResultsDialogProps {
 }
 
 const STORAGE_KEY = "vjudge_sessionId";
+
+function getStoredSession() {
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem(STORAGE_KEY);
+    }
+    return null;
+}
+
+function setStoredSession(value: string) {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, value);
+    }
+}
+
+function removeStoredSession() {
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY);
+    }
+}
 
 function StatusInfo({ currentUser }: { currentUser?: string }) {
     const [currentTime, setCurrentTime] = useState<string>("");
@@ -90,7 +108,7 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
             if (result.success && result.username) {
                 setValidatedUsername(result.username);
                 setSessionId(idToValidate);
-                localStorage.setItem(STORAGE_KEY, idToValidate);
+                setStoredSession(idToValidate);
                 setShowSessionInput(false);
 
                 if (!silent) {
@@ -100,7 +118,7 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
                 }
             } else {
                 setValidatedUsername(null);
-                localStorage.removeItem(STORAGE_KEY);
+                removeStoredSession();
 
                 if (!silent) {
                     toast.error("Invalid Session ID", {
@@ -163,7 +181,7 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
 
     useEffect(() => {
         if (open && !showSessionInput) {
-            const saved = localStorage.getItem(STORAGE_KEY);
+            const saved = getStoredSession();
             if (saved) {
                 setSessionId(saved);
                 void handleValidateSession(saved, true);
@@ -241,13 +259,13 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
                                     <Label htmlFor="sessionId" className="text-lg font-medium">
                                         Vjudge Session ID
                                     </Label>
-                                    {localStorage.getItem(STORAGE_KEY) && !validatedUsername && (
+                                    {getStoredSession() && !validatedUsername && (
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             className="text-primary hover:text-primary-foreground"
                                             onClick={() => {
-                                                const saved = localStorage.getItem(STORAGE_KEY);
+                                                const saved = getStoredSession();
                                                 if (saved) {
                                                     setSessionId(saved);
                                                     void handleValidateSession(saved);
