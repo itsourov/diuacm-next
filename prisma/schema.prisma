@@ -30,6 +30,39 @@ model Event {
   @@map("events")
 }
 
+model Tracker {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title       String    @db.VarChar(255)
+  slug        String    @db.VarChar(255)
+  description String    @db.VarChar(255)
+  status      Status    @default(draft)
+  createdAt   DateTime? @map("created_at")
+  updatedAt   DateTime? @map("updated_at")
+
+  // Relation to RankList
+  rankLists RankList[]
+
+  @@map("trackers")
+}
+
+model RankList {
+  id              BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  trackerId       BigInt    @map("tracker_id") @db.UnsignedBigInt
+  title           String    @db.VarChar(255)
+  session         String    @db.VarChar(255)
+  description     String?   @db.VarChar(255)
+  weightOfUpsolve Float     @default(0.25) @map("weight_of_upsolve")
+  createdAt       DateTime? @map("created_at")
+  updatedAt       DateTime? @map("updated_at")
+
+  // Relations
+  tracker        Tracker         @relation(fields: [trackerId], references: [id])
+  eventRankLists EventRankList[]
+  rankListUsers  RankListUser[]
+
+  @@map("rank_lists")
+}
+
 model EventRankList {
   id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
   eventId    BigInt    @map("event_id") @db.UnsignedBigInt
@@ -38,7 +71,6 @@ model EventRankList {
   createdAt  DateTime? @map("created_at")
   updatedAt  DateTime? @map("updated_at")
 
-  // Relations
   event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   rankList RankList @relation(fields: [rankListId], references: [id], onDelete: Cascade)
 
@@ -52,27 +84,10 @@ model EventUser {
   createdAt DateTime? @map("created_at")
   updatedAt DateTime? @map("updated_at")
 
-  // Relations
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@map("event_user")
-}
-
-model RankList {
-  id              BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  title           String    @db.VarChar(255)
-  session         String    @db.VarChar(255)
-  description     String?   @db.VarChar(255)
-  weightOfUpsolve Float     @default(0.25) @map("weight_of_upsolve")
-  createdAt       DateTime? @map("created_at")
-  updatedAt       DateTime? @map("updated_at")
-
-  // Relations
-  eventRankLists EventRankList[]
-  rankListUsers  RankListUser[]
-
-  @@map("rank_lists")
 }
 
 model RankListUser {
@@ -83,7 +98,6 @@ model RankListUser {
   createdAt  DateTime? @map("created_at")
   updatedAt  DateTime? @map("updated_at")
 
-  // Relations
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   rankList RankList @relation(fields: [rankListId], references: [id], onDelete: Cascade)
 
@@ -100,7 +114,6 @@ model SolveStat {
   createdAt    DateTime? @map("created_at")
   updatedAt    DateTime? @map("updated_at")
 
-  // Relations
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
@@ -129,7 +142,6 @@ model User {
   createdAt        DateTime? @map("created_at")
   updatedAt        DateTime? @map("updated_at")
 
-  // Relations
   eventUsers    EventUser[]
   rankListUsers RankListUser[]
   solveStats    SolveStat[]
@@ -201,4 +213,10 @@ enum Gender {
   female
   other
   unspecified
+}
+
+enum Status {
+  published
+  draft
+  private
 }
