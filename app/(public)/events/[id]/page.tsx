@@ -168,7 +168,7 @@ export default async function EventPage({ params }: EventPageProps) {
               <VjudgeResultsDialog
                 eventId={event.id}
                 contestId={getVjudgeContestId(event.eventLink)}
-                currentUser={session?.user?.name}
+                currentUser={session?.user?.name ?? 'guest'}
               />
             )}
           </div>

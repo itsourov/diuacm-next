@@ -75,9 +75,10 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
     const [open, setOpen] = useState<boolean>(false);
     const [sessionId, setSessionId] = useState<string>("");
     const [isValidating, setIsValidating] = useState<boolean>(false);
-    const [isUpdating, setIsUpdating] = useState<boolean>(false);
     const [validatedUsername, setValidatedUsername] = useState<string | null>(null);
     const [showSessionInput, setShowSessionInput] = useState<boolean>(false);
+    const [isUpdatingWithAuth, setIsUpdatingWithAuth] = useState<boolean>(false);
+    const [isUpdatingWithoutAuth, setIsUpdatingWithoutAuth] = useState<boolean>(false);
 
     const handleValidateSession = useCallback(async (idToValidate: string, silent = false) => {
         if (!idToValidate) return;
@@ -121,7 +122,12 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
 
     const handleUpdateResults = useCallback(async (withAuth: boolean) => {
         try {
-            setIsUpdating(true);
+            if (withAuth) {
+                setIsUpdatingWithAuth(true);
+            } else {
+                setIsUpdatingWithoutAuth(true);
+            }
+
             const result = await updateVjudgeResults({
                 eventId,
                 contestId,
@@ -150,7 +156,8 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
                 description: error instanceof Error ? error.message : "An unexpected error occurred",
             });
         } finally {
-            setIsUpdating(false);
+            setIsUpdatingWithAuth(false);
+            setIsUpdatingWithoutAuth(false);
         }
     }, [contestId, eventId, sessionId, setOpen]);
 
@@ -310,29 +317,30 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
                         <Button
                             variant={validatedUsername ? "outline" : "secondary"}
                             onClick={() => void handleUpdateResults(false)}
-                            disabled={isUpdating}
+                            disabled={isUpdatingWithAuth || isUpdatingWithoutAuth}
                             className={cn(
                                 "flex-1 h-12 text-base font-medium rounded-xl transition-all",
                                 validatedUsername && "hover:bg-secondary"
                             )}
                         >
-                            {isUpdating ? (
+                            {isUpdatingWithoutAuth ? (
                                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                             ) : (
                                 <RefreshCcw className="mr-2 h-5 w-5" />
                             )}
-                            Update Without Auth
+                            {isUpdatingWithoutAuth ? "Updating..." : "Update Without Auth"}
                         </Button>
 
                         <Button
                             onClick={() => void handleUpdateResults(true)}
-                            disabled={isUpdating || !validatedUsername}
-                            className="flex-1 h-12 text-base font-medium rounded-xl 
+                            disabled={isUpdatingWithAuth || isUpdatingWithoutAuth || !validatedUsername}
+                            className="flex-1 h-12 text-base font-medium rounded-xl text-white dark:text-white
                                 bg-gradient-to-r from-blue-600 to-purple-600
                                 hover:from-blue-700 hover:to-purple-700
+                                disabled:from-gray-600 disabled:to-gray-600
                                 transition-all duration-300"
                         >
-                            {isUpdating ? (
+                            {isUpdatingWithAuth ? (
                                 <>
                                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                                     Updating...
