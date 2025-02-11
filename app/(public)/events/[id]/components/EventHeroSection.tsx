@@ -1,3 +1,4 @@
+// app/(public)/events/[id]/components/EventHeroSection.tsx
 "use client";
 
 import { Clock, Calendar, Timer, Users } from "lucide-react";

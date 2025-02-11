@@ -1,3 +1,4 @@
+// app/(public)/events/[id]/components/SolveStatsSection.tsx
 "use client";
 
 import { SolveStat } from "@prisma/client";

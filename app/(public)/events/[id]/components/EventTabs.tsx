@@ -1,3 +1,4 @@
+// app/(public)/events/[id]/components/EventTabs.tsx
 "use client";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";

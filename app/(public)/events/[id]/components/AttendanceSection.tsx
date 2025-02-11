@@ -1,3 +1,4 @@
+// app/(public)/events/[id]/components/AttendanceSection.tsx
 "use client";
 
 import { useState } from "react";
