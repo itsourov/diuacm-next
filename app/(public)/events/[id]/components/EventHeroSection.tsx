@@ -1,7 +1,7 @@
 // app/(public)/events/[id]/components/EventHeroSection.tsx
 "use client";
 
-import { Clock, Calendar, Timer, Users } from "lucide-react";
+import { Clock, Calendar, Timer, Users, Link as LinkIcon } from "lucide-react";
 import { DateTime } from "@/lib/utils/datetime";
 
 interface EventHeroSectionProps {
@@ -12,6 +12,7 @@ interface EventHeroSectionProps {
     type: 'contest' | 'class' | 'other';
     startingAt: Date;
     endingAt: Date;
+    eventLink: string | null;  // Add this line
   };
   attendeeCount: number;
 }
@@ -24,7 +25,7 @@ export default function EventHeroSection({ event, attendeeCount }: EventHeroSect
 
   return (
     <div className="relative py-12 bg-white dark:bg-gray-900">
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-50/20 to-transparent dark:from-blue-900/10"/>
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-50/20 to-transparent dark:from-blue-900/10" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="space-y-6">
@@ -36,7 +37,7 @@ export default function EventHeroSection({ event, attendeeCount }: EventHeroSect
             border border-blue-100/20 dark:border-blue-500/20
             text-blue-600 dark:text-blue-400 font-medium">
             <div className="flex items-center gap-2 text-sm">
-              <span className="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse"/>
+              <span className="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
               {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
             </div>
           </div>
@@ -46,29 +47,48 @@ export default function EventHeroSection({ event, attendeeCount }: EventHeroSect
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
               {event.title}
             </h1>
-            {event.description && (
-              <div 
-                className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed prose dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: event.description }}
-              />
-            )}
+            <div className="space-y-4">
+              {event.description && (
+                <div
+                  className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed prose dark:prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: event.description }}
+                />
+              )}
+              {/* Event Link - Moved here */}
+              {event.eventLink && (
+                <a
+                  href={event.eventLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg
+                    bg-blue-50 dark:bg-blue-900/20 
+                    text-blue-600 dark:text-blue-400
+                    hover:bg-blue-100 dark:hover:bg-blue-900/30
+                    transition-colors duration-200
+                    text-sm"
+                >
+                  <LinkIcon className="w-4 h-4" />
+                  <span className="font-medium">Event Link</span>
+                </a>
+              )}
+            </div>
           </div>
 
           {/* Event Info Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-              <Calendar className="w-8 h-8 text-blue-500 mb-2"/>
+              <Calendar className="w-8 h-8 text-blue-500 mb-2" />
               <h3 className="font-bold text-gray-900 dark:text-white">Date</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {DateTime.formatDisplay(event.startingAt, { 
+                {DateTime.formatDisplay(event.startingAt, {
                   format: 'local',
-                  includeTimezone: false 
+                  includeTimezone: false
                 }).split(',')[0]}
               </p>
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-              <Clock className="w-8 h-8 text-purple-500 mb-2"/>
+              <Clock className="w-8 h-8 text-purple-500 mb-2" />
               <h3 className="font-bold text-gray-900 dark:text-white">Time</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {DateTime.formatDateRange(
@@ -79,10 +99,10 @@ export default function EventHeroSection({ event, attendeeCount }: EventHeroSect
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-              <Timer className="w-8 h-8 text-green-500 mb-2"/>
+              <Timer className="w-8 h-8 text-green-500 mb-2" />
               <h3 className="font-bold text-gray-900 dark:text-white">Duration</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {durationInMinutes >= 60 
+                {durationInMinutes >= 60
                   ? `${Math.floor(durationInMinutes / 60)}h ${durationInMinutes % 60}m`
                   : `${durationInMinutes}m`
                 }
@@ -90,7 +110,7 @@ export default function EventHeroSection({ event, attendeeCount }: EventHeroSect
             </div>
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-              <Users className="w-8 h-8 text-amber-500 mb-2"/>
+              <Users className="w-8 h-8 text-amber-500 mb-2" />
               <h3 className="font-bold text-gray-900 dark:text-white">Attendees</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {attendeeCount} participant{attendeeCount !== 1 ? 's' : ''}

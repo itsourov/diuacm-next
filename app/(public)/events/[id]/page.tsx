@@ -155,6 +155,7 @@ export default async function EventPage({ params }: EventPageProps) {
           type: event.type,
           startingAt: new Date(event.startingAt),
           endingAt: new Date(event.endingAt),
+          eventLink: event.eventLink,  // Add this line
         }}
         attendeeCount={event.eventUsers.length}
       />
