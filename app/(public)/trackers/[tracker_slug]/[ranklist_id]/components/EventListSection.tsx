@@ -1,16 +1,28 @@
 "use client";
 
+import { useState } from "react";
 import { Event, EventRankList } from "@prisma/client";
 import Link from "next/link";
 import { Calendar, Clock, ArrowUpRight } from "lucide-react";
 import { DateTime } from "@/lib/utils/datetime";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface EventListSectionProps {
   events: Array<EventRankList & { event: Event }>;
 }
 
+const PAGE_SIZE = 10;
+
 export default function EventListSection({ events }: EventListSectionProps) {
+  const [displayedCount, setDisplayedCount] = useState(PAGE_SIZE);
+
+  const handleLoadMore = () => {
+    setDisplayedCount((prev) => prev + PAGE_SIZE);
+  };
+
+  const displayedEvents = events.slice(0, displayedCount);
+
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -18,7 +30,7 @@ export default function EventListSection({ events }: EventListSectionProps) {
       </h2>
 
       <div className="grid gap-6">
-        {events.map(({ event, weight }) => (
+        {displayedEvents.map(({ event, weight }) => (
           <Link
             key={event.id.toString()}
             href={`/events/${event.id}`}
@@ -74,11 +86,21 @@ export default function EventListSection({ events }: EventListSectionProps) {
         ))}
       </div>
 
-      {events.length === 0 && (
+      {events.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 text-center">
           <p className="text-gray-600 dark:text-gray-400">
             No events are connected to this ranklist yet.
           </p>
+        </div>
+      ) : displayedCount < events.length && (
+        <div className="flex justify-center pt-4">
+          <Button
+            variant="outline"
+            onClick={handleLoadMore}
+            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+          >
+            Load More
+          </Button>
         </div>
       )}
     </div>
