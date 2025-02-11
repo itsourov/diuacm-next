@@ -7,13 +7,15 @@ import { revalidatePath } from "next/cache";
 export async function toggleRankListSubscription(rankListId: string) {
   try {
     const session = await auth();
-    if (!session?.user) {
+    const userId = session?.user?.id;
+
+    if (!userId) {
       return { success: false, message: "You must be logged in" };
     }
 
     const existingSubscription = await prisma.rankListUser.findFirst({
       where: {
-        userId: session.user.id,
+        userId: userId,
         rankListId: BigInt(rankListId),
       },
     });
@@ -23,9 +25,10 @@ export async function toggleRankListSubscription(rankListId: string) {
         where: { id: existingSubscription.id },
       });
     } else {
+      // Now we know userId is definitely defined
       await prisma.rankListUser.create({
         data: {
-          userId: session.user.id,
+          userId: userId,
           rankListId: BigInt(rankListId),
         },
       });
@@ -40,9 +43,9 @@ export async function toggleRankListSubscription(rankListId: string) {
 }
 
 export async function loadMoreUsers(
-  rankListId: string,
-  skip: number,
-  take: number
+    rankListId: string,
+    skip: number,
+    take: number
 ) {
   try {
     const users = await prisma.rankListUser.findMany({

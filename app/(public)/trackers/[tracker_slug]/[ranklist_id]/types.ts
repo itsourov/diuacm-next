@@ -7,6 +7,11 @@ export interface User {
   image: string | null;
 }
 
+export interface CurrentUser {
+  id: string;
+  name: string;
+}
+
 export interface TrackerWithRelations extends Tracker {
   rankLists: Array<RankList & {
     eventRankLists: Array<EventRankList & {
@@ -26,9 +31,4 @@ export interface RankListUserWithRelations extends RankListUser {
   solveStats?: Array<SolveStat & {
     event: Event;
   }>;
-}
-
-export interface CurrentUser {
-  id: string;
-  name: string;
 }

@@ -1,9 +1,10 @@
-import {notFound} from "next/navigation";
-import {prisma} from "@/lib/prisma";
-import {auth} from "@/lib/auth";
-import {Metadata} from "next";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { Metadata } from "next";
 import TrackerTabs from "./components/TrackerTabs";
 import TrackerHeroSection from "./components/TrackerHeroSection";
+import { CurrentUser } from "./types";
 
 interface PageProps {
     params: {
@@ -13,37 +14,44 @@ interface PageProps {
 }
 
 async function getTrackerData(slug: string, rankListId: string) {
-    const tracker = await prisma.tracker.findUnique({
-        where: {slug},
-        include: {
-            rankLists: {
-                include: {
-                    eventRankLists: {
-                        include: {
-                            event: true,
+    try {
+        const tracker = await prisma.tracker.findFirst({
+            where: {
+                slug: slug,
+            },
+            include: {
+                rankLists: {
+                    include: {
+                        eventRankLists: {
+                            include: {
+                                event: true,
+                            },
                         },
                     },
                 },
             },
-        },
-    });
+        });
 
-    if (!tracker) notFound();
+        if (!tracker) notFound();
 
-    const currentRankList = tracker.rankLists.find(
-        (rl) => rl.id === BigInt(rankListId)
-    );
+        const currentRankList = tracker.rankLists.find(
+            (rl) => rl.id === BigInt(rankListId)
+        );
 
-    if (!currentRankList) notFound();
+        if (!currentRankList) notFound();
 
-    return {
-        tracker,
-        currentRankList,
-    };
+        return {
+            tracker,
+            currentRankList,
+        };
+    } catch (error) {
+        console.error("Error fetching tracker data:", error);
+        throw error;
+    }
 }
 
-export async function generateMetadata({params}: PageProps): Promise<Metadata> {
-    const {tracker, currentRankList} = await getTrackerData(
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const { tracker, currentRankList } = await getTrackerData(
         params.tracker_slug,
         params.ranklist_id
     );
@@ -54,17 +62,18 @@ export async function generateMetadata({params}: PageProps): Promise<Metadata> {
     };
 }
 
-export default async function TrackerPage({params}: PageProps) {
+export default async function TrackerPage({ params }: PageProps) {
     const session = await auth();
-    const {tracker, currentRankList} = await getTrackerData(
+    const { tracker, currentRankList } = await getTrackerData(
         params.tracker_slug,
         params.ranklist_id
     );
 
-    const currentUser = session?.user
+    // Fix: Only create currentUser when we have both id and name
+    const currentUser: CurrentUser | null = session?.user?.id && session.user.name
         ? {
-            id: session.user.id,
-            name: session.user.name || "",
+            id: session.user.id,    // Now we know this is definitely a string
+            name: session.user.name,
         }
         : null;
 
