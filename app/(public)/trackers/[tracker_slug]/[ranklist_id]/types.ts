@@ -32,3 +32,8 @@ export interface RankListUserWithRelations extends RankListUser {
     event: Event;
   }>;
 }
+
+export interface SolveStatWithEvent extends SolveStat {
+  event: Event;
+}
+

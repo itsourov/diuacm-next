@@ -4,13 +4,12 @@ import { auth } from "@/lib/auth";
 import { Metadata } from "next";
 import TrackerTabs from "./components/TrackerTabs";
 import TrackerHeroSection from "./components/TrackerHeroSection";
-import { CurrentUser } from "./types";
 
 interface PageProps {
-    params: {
+    params: Promise<{
         tracker_slug: string;
         ranklist_id: string;
-    };
+    }>;
 }
 
 async function getTrackerData(slug: string, rankListId: string) {
@@ -51,9 +50,10 @@ async function getTrackerData(slug: string, rankListId: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const resolvedParams = await params;
     const { tracker, currentRankList } = await getTrackerData(
-        params.tracker_slug,
-        params.ranklist_id
+        resolvedParams.tracker_slug,
+        resolvedParams.ranklist_id
     );
 
     return {
@@ -63,21 +63,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function TrackerPage({ params }: PageProps) {
+    const resolvedParams = await params;
     const session = await auth();
     const { tracker, currentRankList } = await getTrackerData(
-        params.tracker_slug,
-        params.ranklist_id
+        resolvedParams.tracker_slug,
+        resolvedParams.ranklist_id
     );
 
-    // Fix: Only create currentUser when we have both id and name
-    const currentUser: CurrentUser | null = session?.user?.id && session.user.name
+    const currentUser = session?.user?.id && session.user.name
         ? {
-            id: session.user.id,    // Now we know this is definitely a string
+            id: session.user.id,
             name: session.user.name,
         }
         : null;
 
-    // Check if current user is subscribed to this ranklist
     const userSubscription = currentUser
         ? await prisma.rankListUser.findFirst({
             where: {
@@ -100,7 +99,7 @@ export default async function TrackerPage({ params }: PageProps) {
                     currentRankList={currentRankList}
                     currentUser={currentUser}
                     isSubscribed={!!userSubscription}
-                    rankListId={params.ranklist_id}
+                    rankListId={resolvedParams.ranklist_id}
                 />
             </div>
         </div>
