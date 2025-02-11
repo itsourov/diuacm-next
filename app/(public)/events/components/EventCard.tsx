@@ -1,7 +1,7 @@
-// app/events/components/EventCard.tsx
-import {Event, AttendanceScope} from '@prisma/client';
-import {format, formatDistanceToNow, intervalToDuration, isAfter, isWithinInterval} from 'date-fns';
+import { Event, AttendanceScope } from '@prisma/client';
+import { isAfter, isWithinInterval } from 'date-fns';
 import Link from 'next/link';
+import { DateTime } from '@/lib/utils/datetime';
 
 type EventCardProps = {
     event: Event;
@@ -13,7 +13,7 @@ const getScopeConfig = (scope: AttendanceScope) => {
             return {
                 icon: '👥',
                 label: 'Open for All',
-                shortLabel: 'Open for All', // Shorter label for mobile
+                shortLabel: 'Open for All',
                 class: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
             };
         case 'only_girls':
@@ -33,19 +33,39 @@ const getScopeConfig = (scope: AttendanceScope) => {
     }
 };
 
-export default function EventCard({event}: EventCardProps) {
-    const now = new Date();
+const formatEventStatus = (startDate: Date, now: Date): string => {
+    const diffInMinutes = Math.floor((startDate.getTime() - now.getTime()) / (1000 * 60));
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInDays > 0) {
+        return `in ${diffInDays} day${diffInDays > 1 ? 's' : ''}`;
+    }
+    if (diffInHours > 0) {
+        return `in ${diffInHours} hour${diffInHours > 1 ? 's' : ''}`;
+    }
+    if (diffInMinutes > 0) {
+        return `in ${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''}`;
+    }
+    return 'Starting soon';
+};
+
+export default function EventCard({ event }: EventCardProps) {
+    const now = DateTime.getCurrentUTCTime();
     const startDate = new Date(event.startingAt);
     const endDate = new Date(event.endingAt);
 
     const isUpcoming = isAfter(startDate, now);
-    const isRunning = isWithinInterval(now, {start: startDate, end: endDate});
+    const isRunning = isWithinInterval(now, { start: startDate, end: endDate });
 
-    // Calculate duration
-    const duration = intervalToDuration({start: startDate, end: endDate});
+    // Calculate duration in minutes for consistent display
+    const durationInMinutes = Math.round(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60)
+    );
+
     const formatDuration = () => {
-        const hours = duration.hours || 0;
-        const minutes = duration.minutes || 0;
+        const hours = Math.floor(durationInMinutes / 60);
+        const minutes = durationInMinutes % 60;
         return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
     };
 
@@ -55,7 +75,7 @@ export default function EventCard({event}: EventCardProps) {
             class: 'bg-orange-500 text-white animate-pulse'
         };
         if (isUpcoming) return {
-            label: formatDistanceToNow(startDate, {addSuffix: true}),
+            label: formatEventStatus(startDate, now),
             class: 'bg-emerald-500 text-white'
         };
         return {
@@ -69,7 +89,7 @@ export default function EventCard({event}: EventCardProps) {
 
     return (
         <Link href={`/events/${event.id}`}
-              className="block group focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg">
+            className="block group focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg">
             <div className="relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700
                           hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-200
                           hover:shadow-lg hover:shadow-blue-500/10">
@@ -93,10 +113,10 @@ export default function EventCard({event}: EventCardProps) {
                             <span className="inline-flex items-center px-2 sm:px-2.5 py-1 rounded-md text-xs font-medium
                                          bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
                                 <span className="mr-1 hidden sm:inline">📅</span>
-                                {format(startDate, 'EEE, MMM d')}
+                                {DateTime.formatDisplay(startDate, { format: 'local', includeTimezone: false }).split(',')[0]}
                             </span>
                             <code className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-900 rounded whitespace-nowrap">
-                                {format(startDate, 'HH:mm')} → {format(endDate, 'HH:mm')}
+                                {DateTime.formatDateRange(startDate, endDate)}
                             </code>
                             <code className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-900 rounded">
                                 ⏱️ {formatDuration()}
@@ -107,8 +127,8 @@ export default function EventCard({event}: EventCardProps) {
                         <div className="flex flex-wrap items-center gap-2">
                             <span className={`inline-flex items-center px-2 sm:px-2.5 py-1 rounded-md text-xs font-medium
                                 ${event.type === 'class' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' :
-                                event.type === 'contest' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
-                                    'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300'}
+                                    event.type === 'contest' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                                        'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300'}
                             `}>
                                 <span className="mr-1">
                                     {event.type === 'class' && '📚'}
@@ -133,12 +153,12 @@ export default function EventCard({event}: EventCardProps) {
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700
                                   rounded-b-lg overflow-hidden">
                         <div className="h-full bg-blue-500 animate-pulse"
-                             style={{
-                                 width: `${Math.min(100,
-                                     ((now.getTime() - startDate.getTime()) /
-                                         (endDate.getTime() - startDate.getTime())) * 100
-                                 )}%`
-                             }}>
+                            style={{
+                                width: `${Math.min(100,
+                                    ((now.getTime() - startDate.getTime()) /
+                                        (endDate.getTime() - startDate.getTime())) * 100
+                                )}%`
+                            }}>
                         </div>
                     </div>
                 )}
