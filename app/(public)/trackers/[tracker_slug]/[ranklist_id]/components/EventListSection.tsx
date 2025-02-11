@@ -53,7 +53,7 @@ export default function EventListSection({ events }: EventListSectionProps) {
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
                     {event.title}
                   </h3>
-                  
+
                   {event.description && (
                     <p className="text-gray-600 dark:text-gray-400">
                       {event.description}
