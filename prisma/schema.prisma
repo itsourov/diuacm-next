@@ -14,7 +14,7 @@ model Event {
   status            EventStatus     @default(draft)
   startingAt        DateTime        @map("starting_at")
   endingAt          DateTime        @map("ending_at")
-  eventLink         String?         @map("event_link") @db.VarChar(255)
+  eventLink         String?         @unique @map("event_link") @db.VarChar(255)
   eventPassword     String?         @map("event_password") @db.VarChar(255)
   openForAttendance Boolean         @map("open_for_attendance")
   type              EventType       @default(contest)
@@ -87,6 +87,7 @@ model EventUser {
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, eventId])
   @@map("event_user")
 }
 
@@ -101,6 +102,7 @@ model RankListUser {
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   rankList RankList @relation(fields: [rankListId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, rankListId])
   @@map("rank_list_user")
 }
 
