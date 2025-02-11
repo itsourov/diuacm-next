@@ -43,9 +43,9 @@ export async function toggleRankListSubscription(rankListId: string) {
 }
 
 export async function loadMoreUsers(
-    rankListId: string,
-    skip: number,
-    take: number
+  rankListId: string,
+  skip: number,
+  take: number
 ) {
   try {
     const users = await prisma.rankListUser.findMany({
@@ -63,6 +63,30 @@ export async function loadMoreUsers(
       orderBy: { score: "desc" },
       skip,
       take,
+    });
+
+    return { success: true, users };
+  } catch (error) {
+    console.error("Error loading users:", error);
+    return { success: false, message: "Failed to load users" };
+  }
+}
+
+export async function getAllRankListUsers(rankListId: string) {
+  try {
+    const users = await prisma.rankListUser.findMany({
+      where: { rankListId: BigInt(rankListId) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            image: true,
+          },
+        },
+      },
+      orderBy: { score: "desc" },
     });
 
     return { success: true, users };

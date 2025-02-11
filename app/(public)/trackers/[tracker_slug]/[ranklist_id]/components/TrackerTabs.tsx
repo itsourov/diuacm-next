@@ -11,6 +11,7 @@ interface TrackerTabsProps {
   currentUser: CurrentUser | null;
   isSubscribed: boolean;
   rankListId: string;
+  onRankListChange?: (newRankList: RankListWithRelations) => void;
 }
 
 export default function TrackerTabs({

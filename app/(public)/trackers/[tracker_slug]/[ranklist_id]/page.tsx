@@ -2,8 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { Metadata } from "next";
-import TrackerTabs from "./components/TrackerTabs";
-import TrackerHeroSection from "./components/TrackerHeroSection";
+import TrackerClientPage from "./components/TrackerClientPage";
 
 interface PageProps {
     params: Promise<{
@@ -63,8 +62,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function TrackerPage({ params }: PageProps) {
-    const resolvedParams = await params;
-    const session = await auth();
+    const [resolvedParams, session] = await Promise.all([
+        params,
+        auth()
+    ]);
+
     const { tracker, currentRankList } = await getTrackerData(
         resolvedParams.tracker_slug,
         resolvedParams.ranklist_id
@@ -87,21 +89,12 @@ export default async function TrackerPage({ params }: PageProps) {
         : null;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            <TrackerHeroSection
-                tracker={tracker}
-                currentRankList={currentRankList}
-                rankLists={tracker.rankLists}
-            />
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <TrackerTabs
-                    currentRankList={currentRankList}
-                    currentUser={currentUser}
-                    isSubscribed={!!userSubscription}
-                    rankListId={resolvedParams.ranklist_id}
-                />
-            </div>
-        </div>
+        <TrackerClientPage
+            tracker={tracker}
+            initialRankList={currentRankList}
+            currentUser={currentUser}
+            isSubscribed={!!userSubscription}
+            rankListId={resolvedParams.ranklist_id}
+        />
     );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
     Select,
     SelectContent,
@@ -8,31 +8,37 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {useRouter} from "next/navigation";
-import {RankList} from "@prisma/client";
-import {TrackerWithRelations} from "../types";
-import {RefreshCw} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { RankList } from "@prisma/client";
+import { TrackerWithRelations } from "../types";
+import { RefreshCw } from "lucide-react";
 
 interface TrackerHeroSectionProps {
     tracker: TrackerWithRelations;
     currentRankList: RankList;
     rankLists: RankList[];
+    onRankListChange?: (newRankListId: string) => void;
 }
 
 export default function TrackerHeroSection({
-                                               tracker,
-                                               currentRankList,
-                                               rankLists,
-                                           }: TrackerHeroSectionProps) {
+    tracker,
+    currentRankList,
+    rankLists,
+    onRankListChange,
+}: TrackerHeroSectionProps) {
     const router = useRouter();
 
     const handleRankListChange = (value: string) => {
-        router.push(`/trackers/${tracker.slug}/${value}`);
+        if (onRankListChange) {
+            onRankListChange(value);
+        } else {
+            router.push(`/trackers/${tracker.slug}/${value}`);
+        }
     };
 
     return (
         <div className="relative py-12 bg-white dark:bg-gray-900">
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-50/20 to-transparent dark:from-blue-900/10"/>
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-50/20 to-transparent dark:from-blue-900/10" />
 
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="space-y-6">
@@ -44,7 +50,7 @@ export default function TrackerHeroSection({
             border border-blue-100/20 dark:border-blue-500/20
             text-blue-600 dark:text-blue-400 font-medium">
                         <div className="flex items-center gap-2 text-sm">
-                            <span className="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse"/>
+                            <span className="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                             Tracker
                         </div>
                     </div>
@@ -69,7 +75,7 @@ export default function TrackerHeroSection({
                         >
                             <SelectTrigger
                                 className="w-[280px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 ring-offset-white dark:ring-offset-gray-900">
-                                <SelectValue placeholder="Select a ranklist"/>
+                                <SelectValue placeholder="Select a ranklist" />
                             </SelectTrigger>
                             <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                                 {rankLists.map((rankList) => (
@@ -89,7 +95,7 @@ export default function TrackerHeroSection({
                             onClick={() => router.refresh()}
                             className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                         >
-                            <RefreshCw className="w-4 h-4 mr-2"/>
+                            <RefreshCw className="w-4 h-4 mr-2" />
                             Refresh
                         </Button>
                     </div>

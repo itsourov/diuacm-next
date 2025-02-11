@@ -1,14 +1,14 @@
 "use client";
 
-import {useEffect, useCallback, useState} from "react";
-import {Button} from "@/components/ui/button";
-import {useToast} from "@/hooks/use-toast";
+import { useEffect, useCallback, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import UserAvatar from "@/components/UserAvatar";
-import {Trophy, Award, Star} from "lucide-react";
-import {RankListUserWithRelations, CurrentUser, User} from "../types";
-import {loadMoreUsers, toggleRankListSubscription} from "../actions";
+import { Trophy, Award, Star } from "lucide-react";
+import { RankListUserWithRelations, CurrentUser, User } from "../types";
+import { toggleRankListSubscription, getAllRankListUsers } from "../actions";
 import PointHistoryModal from "./PointHistoryModal";
-import {cn} from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface RankListSectionProps {
     rankListId: string;
@@ -17,27 +17,26 @@ interface RankListSectionProps {
 }
 
 export default function RankListSection({
-                                            rankListId,
-                                            currentUser,
-                                            isSubscribed,
-                                        }: RankListSectionProps) {
-    const [users, setUsers] = useState<RankListUserWithRelations[]>([]);
+    rankListId,
+    currentUser,
+    isSubscribed,
+}: RankListSectionProps) {
+    const [allUsers, setAllUsers] = useState<RankListUserWithRelations[]>([]);
+    const [displayedUsers, setDisplayedUsers] = useState<RankListUserWithRelations[]>([]);
     const [loading, setLoading] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
     const [selectedUser, setSelectedUser] = useState<RankListUserWithRelations | null>(
         null
     );
-    const {toast} = useToast();
+    const { toast } = useToast();
+    const PAGE_SIZE = 20;
 
-    const loadUsers = useCallback(async (isInitial = false) => {
+    const loadUsers = useCallback(async () => {
         setLoading(true);
         try {
-            const skip = isInitial ? 0 : users.length;
-            const result = await loadMoreUsers(rankListId, skip, 20);
-
+            const result = await getAllRankListUsers(rankListId);
             if (result.success && result.users) {
-                setUsers(prevUsers => isInitial ? result.users : [...prevUsers, ...result.users]);
-                setHasMore(result.users.length === 20);
+                setAllUsers(result.users);
+                setDisplayedUsers(result.users.slice(0, PAGE_SIZE));
             } else {
                 toast({
                     title: "Error",
@@ -55,11 +54,16 @@ export default function RankListSection({
         } finally {
             setLoading(false);
         }
-    }, [rankListId, toast, users.length]); // Include dependencies used in the callback
+    }, [rankListId, toast]);
 
     useEffect(() => {
-        loadUsers(true);
-    }, [loadUsers]); // Now loadUsers is stable and can be safely used as a dependency
+        loadUsers();
+    }, [loadUsers]);
+
+    const loadMore = useCallback(() => {
+        const currentLength = displayedUsers.length;
+        setDisplayedUsers(allUsers.slice(0, currentLength + PAGE_SIZE));
+    }, [allUsers, displayedUsers.length]);
 
     const handleSubscriptionToggle = async () => {
         if (!currentUser) {
@@ -83,7 +87,7 @@ export default function RankListSection({
                     : "bg-green-50 dark:bg-green-900/20",
             });
             // Refresh the user list after subscription change
-            loadUsers(true);
+            // loadUsers(true);
         } else {
             toast({
                 title: "Error",
@@ -117,56 +121,56 @@ export default function RankListSection({
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                            <th className="py-4 px-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                                Rank
-                            </th>
-                            <th className="py-4 px-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
-                                Participant
-                            </th>
-                            <th className="py-4 px-4 text-right text-sm font-medium text-gray-500 dark:text-gray-400">
-                                Score
-                            </th>
-                            <th className="py-4 px-4 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                                Actions
-                            </th>
-                        </tr>
+                            <tr className="border-b border-gray-200 dark:border-gray-700">
+                                <th className="py-4 px-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Rank
+                                </th>
+                                <th className="py-4 px-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Participant
+                                </th>
+                                <th className="py-4 px-4 text-right text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Score
+                                </th>
+                                <th className="py-4 px-4 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    Actions
+                                </th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {users.map((user, index) => (
-                            <tr
-                                key={user.userId}
-                                className={cn(
-                                    "border-b border-gray-100 dark:border-gray-800",
-                                    user.userId === currentUser?.id &&
-                                    "bg-blue-50/50 dark:bg-blue-900/10"
-                                )}
-                            >
-                                <RankCell index={index}/>
-                                <UserCell user={user.user}/>
-                                <ScoreCell score={user.score}/>
-                                <ActionCell
-                                    user={user}
-                                    onViewHistory={() => setSelectedUser(user)}
-                                />
-                            </tr>
-                        ))}
+                            {displayedUsers.map((user, index) => (
+                                <tr
+                                    key={user.userId}
+                                    className={cn(
+                                        "border-b border-gray-100 dark:border-gray-800",
+                                        user.userId === currentUser?.id &&
+                                        "bg-blue-50/50 dark:bg-blue-900/10"
+                                    )}
+                                >
+                                    <RankCell index={index} />
+                                    <UserCell user={user.user} />
+                                    <ScoreCell score={user.score} />
+                                    <ActionCell
+                                        user={user}
+                                        onViewHistory={() => setSelectedUser(user)}
+                                    />
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
 
-                {hasMore && (
+                {displayedUsers.length < allUsers.length && (
                     <div className="p-4 flex justify-center">
                         <Button
                             variant="outline"
-                            onClick={() => loadUsers(false)}
+                            onClick={loadMore}
                             disabled={loading}
                             className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                         >
                             {loading ? (
                                 <>
                                     <div
-                                        className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-gray-600 dark:border-t-gray-300"/>
+                                        className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-gray-600 dark:border-t-gray-300" />
                                     Loading...
                                 </>
                             ) : (
@@ -188,7 +192,7 @@ export default function RankListSection({
 
 
 // Helper Components
-function RankCell({index}: { index: number }) {
+function RankCell({ index }: { index: number }) {
     const rankBadge = getRankBadge(index);
     return (
         <td className="py-4 px-4">
@@ -200,7 +204,7 @@ function RankCell({index}: { index: number }) {
                             rankBadge.className
                         )}
                     >
-                        <rankBadge.icon className="w-5 h-5"/>
+                        <rankBadge.icon className="w-5 h-5" />
                     </div>
                 ) : (
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center">
@@ -212,11 +216,11 @@ function RankCell({index}: { index: number }) {
     );
 }
 
-function UserCell({user}: { user: User }) {
+function UserCell({ user }: { user: User }) {
     return (
         <td className="py-4 px-4">
             <div className="flex items-center gap-3">
-                <UserAvatar user={user} className="w-10 h-10"/>
+                <UserAvatar user={user} className="w-10 h-10" />
                 <div>
                     <p className="font-medium text-gray-900 dark:text-white">
                         {user.name}
@@ -230,7 +234,7 @@ function UserCell({user}: { user: User }) {
     );
 }
 
-function ScoreCell({score}: { score: number }) {
+function ScoreCell({ score }: { score: number }) {
     return (
         <td className="py-4 px-4 text-right">
             <p className="font-mono text-lg font-medium text-gray-900 dark:text-white">
@@ -241,8 +245,8 @@ function ScoreCell({score}: { score: number }) {
 }
 
 function ActionCell({
-                        onViewHistory,
-                    }: {
+    onViewHistory,
+}: {
     user: RankListUserWithRelations;
     onViewHistory: () => void;
 }) {
