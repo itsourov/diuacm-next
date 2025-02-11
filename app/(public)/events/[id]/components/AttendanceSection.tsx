@@ -166,7 +166,7 @@ export default function AttendanceSection({
                                 </label>
                                 <div className="relative">
                                     <Input
-                                        type="password"
+                                        type="text"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter the event password"

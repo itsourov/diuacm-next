@@ -98,7 +98,7 @@ export class DateTime {
      */
     static formatDateRange(startDate: Date, endDate: Date): string {
         const sameDay = startDate.toDateString() === endDate.toDateString();
-        
+
         const formatOptions: Intl.DateTimeFormatOptions = {
             month: 'short',
             day: 'numeric',
