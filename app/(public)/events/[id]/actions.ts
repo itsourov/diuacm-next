@@ -88,25 +88,25 @@ export async function giveAttendance(eventId: string, password: string): Promise
       },
     });
 
-    // Update solve stats if it exists, create if it doesn't
-    await prisma.solveStat.upsert({
-      where: {
-        userId_eventId: {
-          userId: userId,
-          eventId: BigInt(eventId),
-        },
-      },
-      update: {
-        isPresent: true,
-      },
-      create: {
-        userId: userId,
-        eventId: BigInt(eventId),
-        solveCount: BigInt(0),
-        upsolveCount: BigInt(0),
-        isPresent: true,
-      },
-    });
+    // // Update solve stats if it exists, create if it doesn't
+    // await prisma.solveStat.upsert({
+    //   where: {
+    //     userId_eventId: {
+    //       userId: userId,
+    //       eventId: BigInt(eventId),
+    //     },
+    //   },
+    //   update: {
+    //     isPresent: true,
+    //   },
+    //   create: {
+    //     userId: userId,
+    //     eventId: BigInt(eventId),
+    //     solveCount: BigInt(0),
+    //     upsolveCount: BigInt(0),
+    //     isPresent: true,
+    //   },
+    // });
 
     // Revalidate the event page to show updated attendance
     revalidatePath(`/events/${eventId}`);

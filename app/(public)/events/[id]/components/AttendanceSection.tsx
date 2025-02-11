@@ -115,7 +115,7 @@ export default function AttendanceSection({
                     description: "Your attendance has been recorded.",
                     className: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800",
                 });
-                window.location.reload();
+
             } else {
                 toast({
                     title: "Error",
