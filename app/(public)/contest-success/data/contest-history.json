@@ -1,0 +1,40 @@
+{
+  "semesters": [
+    {
+      "name": "Fall 2023",
+      "period": "September 2023 - December 2023",
+      "contests": [
+        {
+          "title": "ICPC Dhaka Regional 2023",
+          "date": "2023-11-15",
+          "ranklistLink": "https://icpc.global/...",
+          "venue": "Green University",
+          "teams": [
+            {
+              "name": "DIU_Voyagers",
+              "rank": 15,
+              "members": [
+                {
+                  "name": "John Doe",
+                  "studentId": "221-35-1234"
+                },
+                {
+                  "name": "Jane Smith",
+                  "studentId": "221-35-1235"
+                },
+                {
+                  "name": "Alex Johnson",
+                  "studentId": "221-35-1236"
+                }
+              ]
+            }
+          ],
+          "images": [
+            "/images/contests/spring25/uiu-iupc/kuet-iupc-2025-2.png",
+            "/images/contests/spring25/uiu-iupc/uiu-iupc-2025-1.png"
+          ]
+        }
+      ]
+    }
+  ]
+}
