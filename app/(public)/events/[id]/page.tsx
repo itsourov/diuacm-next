@@ -9,6 +9,7 @@ import { Metadata } from "next";
 import { DateTime } from "@/lib/utils/datetime";
 import { Event, SolveStat } from "@prisma/client";
 import { VjudgeResultsDialog } from "./contest-result-updater/vjudge";
+import { CodeforcesResultsDialog } from "./contest-result-updater/codeforces";
 
 interface EventPageProps {
   params: Promise<{ id: string }>;  // Changed to Promise
@@ -172,6 +173,14 @@ export default async function EventPage({ params }: EventPageProps) {
                 currentUser={session?.user?.name ?? 'guest'}
               />
             )}
+
+            {event.type === 'contest' && event.eventLink?.includes('codeforces.com') && (
+              <CodeforcesResultsDialog
+                eventId={event.id}
+                contestId={getCodeforcesContestId(event.eventLink)}
+                currentUser={session?.user?.name ?? 'guest'}
+              />
+            )}
           </div>
 
           {/* Countdown Section - Only show if event hasn't ended */}
@@ -200,6 +209,11 @@ export default async function EventPage({ params }: EventPageProps) {
 }
 
 function getVjudgeContestId(url: string): string {
+  const match = url.match(/contest\/(\d+)/);
+  return match ? match[1] : "";
+}
+
+function getCodeforcesContestId(url: string): string {
   const match = url.match(/contest\/(\d+)/);
   return match ? match[1] : "";
 }
