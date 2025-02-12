@@ -12,6 +12,7 @@ interface ContestCardProps {
 
 export default function ContestCard({ contest }: ContestCardProps) {
   const [showGallery, setShowGallery] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
@@ -101,22 +102,26 @@ export default function ContestCard({ contest }: ContestCardProps) {
 
       {/* Images Section */}
       {contest.images.length > 0 && (
-        <div className="p-8 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-8 border-t border-gray-100 dark:border-gray-700 bg-gray-100/50 dark:bg-gray-800/50">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {contest.images.map((image, index) => (
               <div
                 key={index}
-                className="relative aspect-[4/3] rounded-xl overflow-hidden cursor-pointer
+                className="relative aspect-video sm:aspect-[4/3] rounded-xl overflow-hidden cursor-pointer
                          ring-1 ring-gray-200 dark:ring-gray-700
                          hover:ring-blue-300 dark:hover:ring-blue-700
                          transition-all duration-200"
-                onClick={() => setShowGallery(true)}
+                onClick={() => {
+                  setSelectedImageIndex(index);
+                  setShowGallery(true);
+                }}
               >
                 <Image
                   src={image}
                   alt={`${contest.title} photo ${index + 1}`}
                   fill
                   className="object-cover hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
               </div>
             ))}
@@ -128,6 +133,7 @@ export default function ContestCard({ contest }: ContestCardProps) {
         images={contest.images}
         open={showGallery}
         onClose={() => setShowGallery(false)}
+        initialIndex={selectedImageIndex}
       />
     </div>
   );
