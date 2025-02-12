@@ -17,13 +17,6 @@ const CODEFORCES_API = {
     }
 } as const;
 
-class CodeforcesAPIError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'CodeforcesAPIError';
-    }
-}
-
 interface CodeforcesError extends BaseCodeforcesResponse {
     status: "FAILED";
     comment: string;
@@ -41,11 +34,14 @@ function isCodeforcesError(data: BaseCodeforcesResponse): data is CodeforcesErro
 const getContestStandings = cache(async (
     contestId: string,
     handles: string[]
-): Promise<CodeforcesStandingsResponse> => {
+): Promise<{ success: boolean; data?: CodeforcesStandingsResponse; error?: string }> => {
     const validHandles = handles.filter(Boolean);
 
     if (validHandles.length === 0) {
-        throw new CodeforcesAPIError("No valid Codeforces handles found");
+        return {
+            success: false,
+            error: "No valid Codeforces handles found"
+        };
     }
 
     try {
@@ -59,28 +55,31 @@ const getContestStandings = cache(async (
 
         const data = await response.json();
 
-        // Check for Codeforces API error response
         if (isCodeforcesError(data)) {
-            const errorMessage = data.comment
-                .replace(/handles: /, '')
-                .replace(/contestId: /, '');
-            throw new CodeforcesAPIError(errorMessage);
+            return {
+                success: false,
+                error: data.comment
+                    .replace(/handles: /, '')
+                    .replace(/contestId: /, '')
+            };
         }
 
         if (!response.ok || data.status !== "OK" || !data.result) {
-            throw new CodeforcesAPIError(
-                'Invalid response from Codeforces API'
-            );
+            return {
+                success: false,
+                error: 'Invalid response from Codeforces API'
+            };
         }
 
-        return data as CodeforcesStandingsResponse;
+        return {
+            success: true,
+            data: data as CodeforcesStandingsResponse
+        };
     } catch (error) {
-        if (error instanceof CodeforcesAPIError) {
-            throw error;
-        }
-        throw new CodeforcesAPIError(
-            `Failed to fetch standings: ${error instanceof Error ? error.message : String(error)}`
-        );
+        return {
+            success: false,
+            error: `Failed to fetch standings: ${error instanceof Error ? error.message : String(error)}`
+        };
     }
 });
 
@@ -91,7 +90,6 @@ function processUserResults(
     try {
         const result = standings.result!;
 
-        // Find contest and practice participations
         const contestRow = result.rows.find(
             row => row.party.participantType === "CONTESTANT" &&
                 row.party.members.some(m => m.handle.toLowerCase() === handle.toLowerCase())
@@ -106,19 +104,16 @@ function processUserResults(
             return { solveCount: 0, upsolveCount: 0, absent: true };
         }
 
-        // Count problems solved during contest
         const solveCount = contestRow?.problemResults.filter(
             problem => problem.points > 0
         ).length ?? 0;
 
-        // Track problems solved during contest
         const contestSolvedProblems = new Set(
             contestRow?.problemResults
                 .map((problem, index) => problem.points > 0 ? index : -1)
                 .filter(index => index !== -1) ?? []
         );
 
-        // Count upsolves (excluding problems solved during contest)
         const upsolveCount = practiceRow?.problemResults.reduce((count, problem, index) => {
             return count + (problem.points > 0 && !contestSolvedProblems.has(index) ? 1 : 0);
         }, 0) ?? 0;
@@ -141,7 +136,7 @@ function processUserResults(
 export async function updateCodeforcesResults(
     eventId: bigint,
     contestId: string,
-    singleUserId?: string // New parameter for single user update
+    singleUserId?: string
 ): Promise<UpdateResultsResponse> {
     try {
         const event = await prisma.event.findUnique({
@@ -172,7 +167,6 @@ export async function updateCodeforcesResults(
             return { success: false, error: "Event not found" };
         }
 
-        // Get unique users with Codeforces handles
         const users = event.eventRankLists
             .flatMap(erl => erl.rankList.rankListUsers)
             .map(rlu => rlu.user)
@@ -187,7 +181,6 @@ export async function updateCodeforcesResults(
             return { success: false, error: "No users with Codeforces handles found" };
         }
 
-        // Filter users based on singleUserId if provided
         let filteredUsers = users;
         if (singleUserId) {
             filteredUsers = users.filter(user => user.id === singleUserId);
@@ -196,57 +189,60 @@ export async function updateCodeforcesResults(
             }
         }
 
-        const standings = await getContestStandings(
+        const standingsResult = await getContestStandings(
             contestId,
             filteredUsers.map(u => u.codeforcesHandle)
         );
 
+        if (!standingsResult.success || !standingsResult.data) {
+            return { success: false, error: standingsResult.error };
+        }
+
         const processedResults: Record<string, ProcessedResult> = {};
 
-        // Process results for each user
         filteredUsers.forEach(user => {
             processedResults[user.codeforcesHandle] = processUserResults(
                 user.codeforcesHandle,
-                standings
+                standingsResult.data!
             );
         });
 
-        // Update database
-        await prisma.$transaction(async (tx) => {
-            // Delete existing solve stats for this event
-            await tx.solveStat.deleteMany({
-                where: { eventId }
+        try {
+            await prisma.$transaction(async (tx) => {
+                await tx.solveStat.deleteMany({
+                    where: { eventId }
+                });
+
+                await Promise.all(filteredUsers.map(user => {
+                    const stats = processedResults[user.codeforcesHandle];
+                    return tx.solveStat.create({
+                        data: {
+                            userId: user.id,
+                            eventId,
+                            solveCount: BigInt(stats.solveCount),
+                            upsolveCount: BigInt(stats.upsolveCount),
+                            isPresent: !stats.absent,
+                        }
+                    });
+                }));
             });
 
-            // Create new solve stats
-            await Promise.all(filteredUsers.map(user => {
-                const stats = processedResults[user.codeforcesHandle];
-
-                return tx.solveStat.create({
-                    data: {
-                        userId: user.id,
-                        eventId,
-                        solveCount: BigInt(stats.solveCount),
-                        upsolveCount: BigInt(stats.upsolveCount),
-                        isPresent: !stats.absent,
-                    }
-                });
-            }));
-        });
-
-        revalidatePath(`/events/${eventId}`);
-        return { success: true, data: processedResults };
+            revalidatePath(`/events/${eventId}`);
+            return { success: true, data: processedResults };
+        } catch (dbError) {
+            console.error("Database transaction error:", dbError);
+            return {
+                success: false,
+                error: "Failed to update database records",
+                data: processedResults
+            };
+        }
 
     } catch (error) {
         console.error("Update error:", error);
-
-        let errorMessage = "Failed to update results";
-        if (error instanceof CodeforcesAPIError) {
-            errorMessage = error.message;
-        } else if (error instanceof Error) {
-            errorMessage = error.message;
-        }
-
-        return { success: false, error: errorMessage };
+        return {
+            success: false,
+            error: `Unexpected error: ${error instanceof Error ? error.message : String(error)}`
+        };
     }
 }
