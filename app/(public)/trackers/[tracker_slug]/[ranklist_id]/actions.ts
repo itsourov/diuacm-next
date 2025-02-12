@@ -131,3 +131,70 @@ export async function getUserSolveStats(userId: string, rankListId: string) {
     return { success: false, message: "Failed to load solve stats" };
   }
 }
+
+export async function recalculateRankListScores(rankListId: string) {
+  try {
+    // Get the rank list with its events and weightOfUpsolve
+    const rankList = await prisma.rankList.findUnique({
+      where: { id: BigInt(rankListId) },
+      include: {
+        eventRankLists: {
+          include: {
+            event: true,
+          },
+        },
+      },
+    });
+
+    if (!rankList) {
+      return { success: false, message: "Ranklist not found" };
+    }
+
+    // Get all users in the ranklist
+    const rankListUsers = await prisma.rankListUser.findMany({
+      where: { rankListId: BigInt(rankListId) },
+    });
+
+    // Calculate scores for each user
+    for (const user of rankListUsers) {
+      let totalScore = 0;
+
+      // Get solve stats for all events
+      const solveStats = await prisma.solveStat.findMany({
+        where: {
+          userId: user.userId,
+          eventId: {
+            in: rankList.eventRankLists.map((erl) => erl.eventId),
+          },
+        },
+      });
+
+      // Calculate score for each event
+      for (const stat of solveStats) {
+        const eventRankList = rankList.eventRankLists.find(
+          (erl) => erl.eventId === stat.eventId
+        );
+        if (eventRankList) {
+          const contestScore = Number(stat.solveCount) * eventRankList.weight;
+          const upsolveScore =
+            Number(stat.upsolveCount) *
+            eventRankList.weight *
+            rankList.weightOfUpsolve;
+          totalScore += contestScore + upsolveScore;
+        }
+      }
+
+      // Update user's score
+      await prisma.rankListUser.update({
+        where: { id: user.id },
+        data: { score: totalScore },
+      });
+    }
+
+    revalidatePath("/trackers/[tracker_slug]/[ranklist_id]");
+    return { success: true, message: "Scores recalculated successfully" };
+  } catch (error) {
+    console.error("Error recalculating scores:", error);
+    return { success: false, message: "Failed to recalculate scores" };
+  }
+}

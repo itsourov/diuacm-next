@@ -67,15 +67,14 @@ export default function TrackerHeroSection({
                         )}
                     </div>
 
-                    {/* RankList Selector */}
-                    <div className="flex items-center gap-4">
+                    {/* RankList Selector - Modified for mobile */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                         <Select
                             value={currentRankList.id.toString()}
                             onValueChange={handleRankListChange}
                         >
-                            <SelectTrigger
-                                className="w-[280px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 ring-offset-white dark:ring-offset-gray-900">
-                                <SelectValue placeholder="Select a ranklist" />
+                            <SelectTrigger className="w-full sm:w-[200px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 ring-offset-white dark:ring-offset-gray-900">
+                                <SelectValue placeholder="Select session" />
                             </SelectTrigger>
                             <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                                 {rankLists.map((rankList) => (
@@ -84,7 +83,7 @@ export default function TrackerHeroSection({
                                         value={rankList.id.toString()}
                                         className="hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700"
                                     >
-                                        {rankList.title} ({rankList.session})
+                                        {rankList.session}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -93,7 +92,7 @@ export default function TrackerHeroSection({
                         <Button
                             variant="outline"
                             onClick={() => router.refresh()}
-                            className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                            className="w-full sm:w-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                         >
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Refresh

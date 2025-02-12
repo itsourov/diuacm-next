@@ -4,9 +4,9 @@ import { useEffect, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import UserAvatar from "@/components/UserAvatar";
-import { Trophy, Award, Star } from "lucide-react";
+import { Trophy, Award, Star, Loader2 } from "lucide-react";
 import { RankListUserWithRelations, CurrentUser, User } from "../types";
-import { toggleRankListSubscription, getAllRankListUsers } from "../actions";
+import { toggleRankListSubscription, getAllRankListUsers, recalculateRankListScores } from "../actions";
 import PointHistoryModal from "./PointHistoryModal";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +27,7 @@ export default function RankListSection({
     const [selectedUser, setSelectedUser] = useState<RankListUserWithRelations | null>(
         null
     );
+    const [recalculateLoading, setRecalculateLoading] = useState(false);
     const { toast } = useToast();
     const PAGE_SIZE = 20;
 
@@ -87,7 +88,7 @@ export default function RankListSection({
                     : "bg-green-50 dark:bg-green-900/20",
             });
             // Refresh the user list after subscription change
-            // loadUsers(true);
+            loadUsers();
         } else {
             toast({
                 title: "Error",
@@ -97,24 +98,72 @@ export default function RankListSection({
         }
     };
 
+    const handleRecalculateScores = async () => {
+        setRecalculateLoading(true);
+        try {
+            const result = await recalculateRankListScores(rankListId);
+            if (result.success) {
+                toast({
+                    title: "Success",
+                    description: result.message,
+                    className: "bg-green-50 dark:bg-green-900/20",
+                });
+                // Reload the users list
+                await loadUsers();
+            } else {
+                toast({
+                    title: "Error",
+                    description: result.message,
+                    variant: "destructive",
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Failed to recalculate scores. " + error,
+                variant: "destructive",
+            });
+        } finally {
+            setRecalculateLoading(false);
+        }
+    };
+
     return (
         <div className="space-y-8">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     Participants
                 </h2>
-                <Button
-                    variant={isSubscribed ? "destructive" : "default"}
-                    onClick={handleSubscriptionToggle}
-                    className={cn(
-                        isSubscribed
-                            ? "bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
-                            : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700",
-                        "text-white"
-                    )}
-                >
-                    {isSubscribed ? "Leave Ranklist" : "Join Ranklist"}
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <Button
+                        variant="outline"
+                        onClick={handleRecalculateScores}
+                        disabled={recalculateLoading}
+                        className="w-full sm:w-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    >
+                        {recalculateLoading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Recalculating...
+                            </>
+                        ) : (
+                            'Recalculate Scores'
+                        )}
+                    </Button>
+                    <Button
+                        variant={isSubscribed ? "destructive" : "default"}
+                        onClick={handleSubscriptionToggle}
+                        className={cn(
+                            "w-full sm:w-auto",
+                            isSubscribed
+                                ? "bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
+                                : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700",
+                            "text-white"
+                        )}
+                    >
+                        {isSubscribed ? "Leave Ranklist" : "Join Ranklist"}
+                    </Button>
+                </div>
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
