@@ -30,7 +30,7 @@ export default function ImageGallery({ images, open, onClose, initialIndex }: Im
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-full sm:max-w-7xl w-screen h-[100dvh] sm:h-[90vh] p-0">
+      <DialogContent className="max-w-full sm:max-w-7xl w-screen h-[100dvh] sm:h-[90vh] p-0 [&>button]:hidden">
         <div className="relative w-full h-full">
           {/* Close button */}
           <button
