@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { cache } from "react";
 import type {
+    BaseCodeforcesResponse,
     CodeforcesStandingsResponse,
     ProcessedResult,
     UpdateResultsResponse,
@@ -23,13 +24,18 @@ class CodeforcesAPIError extends Error {
     }
 }
 
-interface CodeforcesError {
+interface CodeforcesError extends BaseCodeforcesResponse {
     status: "FAILED";
     comment: string;
 }
 
-function isCodeforcesError(data: any): data is CodeforcesError {
-    return data && data.status === "FAILED" && typeof data.comment === "string";
+function isCodeforcesError(data: BaseCodeforcesResponse): data is CodeforcesError {
+    return data.status === "FAILED" &&
+        typeof data.comment === "string" &&
+        (
+            data.comment.includes("handles:") ||
+            data.comment.includes("contestId:")
+        );
 }
 
 const getContestStandings = cache(async (
@@ -55,18 +61,19 @@ const getContestStandings = cache(async (
 
         // Check for Codeforces API error response
         if (isCodeforcesError(data)) {
-            throw new CodeforcesAPIError(
-                data.comment.replace(/handles: /, '')
-            );
+            const errorMessage = data.comment
+                .replace(/handles: /, '')
+                .replace(/contestId: /, '');
+            throw new CodeforcesAPIError(errorMessage);
         }
 
         if (!response.ok || data.status !== "OK" || !data.result) {
             throw new CodeforcesAPIError(
-                'Failed to fetch data from Codeforces API'
+                'Invalid response from Codeforces API'
             );
         }
 
-        return data;
+        return data as CodeforcesStandingsResponse;
     } catch (error) {
         if (error instanceof CodeforcesAPIError) {
             throw error;

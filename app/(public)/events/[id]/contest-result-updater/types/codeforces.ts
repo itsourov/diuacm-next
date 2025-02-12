@@ -1,42 +1,14 @@
-export interface ContestProblem {
+interface CfProblem {
     contestId: number;
     index: string;
     name: string;
     type: string;
     points: number;
+    rating: number;
     tags: string[];
 }
 
-export interface ContestMember {
-    handle: string;
-}
-
-export interface ContestParty {
-    contestId: number;
-    members: ContestMember[];
-    participantType: "CONTESTANT" | "PRACTICE";
-    ghost: boolean;
-    startTimeSeconds: number;
-}
-
-export interface ProblemResult {
-    points: number;
-    rejectedAttemptCount: number;
-    type: "FINAL";
-    bestSubmissionTimeSeconds?: number;
-}
-
-export interface ContestRow {
-    party: ContestParty;
-    rank: number;
-    points: number;
-    penalty: number;
-    successfulHackCount: number;
-    unsuccessfulHackCount: number;
-    problemResults: ProblemResult[];
-}
-
-export interface CodeforcesContest {
+interface CfContest {
     id: number;
     name: string;
     type: string;
@@ -47,14 +19,35 @@ export interface CodeforcesContest {
     relativeTimeSeconds: number;
 }
 
-export interface CodeforcesStandingsResponse {
+interface CfPartyMember {
+    handle: string;
+}
+
+interface CfParty {
+    participantType: "CONTESTANT" | "PRACTICE" | string;
+    members: CfPartyMember[];
+}
+
+interface CfProblemResult {
+    points: number;
+}
+
+interface CfRanklistRow {
+    party: CfParty;
+    problemResults: CfProblemResult[];
+}
+
+export interface BaseCodeforcesResponse {
     status: "OK" | "FAILED";
-    result?: {
-        contest: CodeforcesContest;
-        problems: ContestProblem[];
-        rows: ContestRow[];
-    };
     comment?: string;
+}
+
+export interface CodeforcesStandingsResponse extends BaseCodeforcesResponse {
+    result?: {
+        contest: CfContest;
+        problems: CfProblem[];
+        rows: CfRanklistRow[];
+    };
 }
 
 export interface ProcessedResult {
