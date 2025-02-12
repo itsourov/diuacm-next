@@ -1,35 +1,12 @@
-// Code: app/(auth)/login/page.tsx
-"use client"
-import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import SocialLoginButton from "@/app/(auth)/components/SocialLoginButton";
 import LoginForm from "@/app/(auth)/login/LoginForm";
 
 export default function LoginPage() {
-    const {status } = useSession();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (status === 'authenticated') {
-            router.push('/');
-        }
-    }, [status, router]);
-
-    if (status === 'authenticated') {
-        return null; // or a loading spinner
-    }
-
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
             <div className="max-w-md w-full">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl"
-                >
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
                     {/* Header */}
                     <div className="text-center mb-8">
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -76,7 +53,7 @@ export default function LoginPage() {
                             Sign up
                         </Link>
                     </p>
-                </motion.div>
+                </div>
             </div>
         </div>
     );
