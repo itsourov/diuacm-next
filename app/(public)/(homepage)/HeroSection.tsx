@@ -1,5 +1,5 @@
 // components/HeroSection.tsx
-import {ArrowRight, ChevronRight, Code2, Terminal} from 'lucide-react';
+import { ArrowRight, ChevronRight, Code2, Terminal } from 'lucide-react';
 import Link from "next/link";
 
 const HeroSection = () => {
@@ -9,7 +9,7 @@ const HeroSection = () => {
     return (
         <div className="relative min-h-[calc(100vh-64px)] bg-white dark:bg-gray-900 flex items-center py-8">
             {/* Background gradient */}
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-50/20 to-transparent dark:from-blue-900/10"/>
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-50/20 to-transparent dark:from-blue-900/10" />
 
             {/* Hero Content */}
             <div className="relative w-full">
@@ -41,7 +41,7 @@ const HeroSection = () => {
                                         Start your journey with DIU ACM
                                     </h2>
                                     <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white">
-                                        Where Programmers <br className="hidden sm:block"/>
+                                        Where Programmers <br className="hidden sm:block" />
                                         <span className="relative">
                                             Become Gladiators
                                             <span
@@ -57,14 +57,14 @@ const HeroSection = () => {
                                 {/* Modern buttons with hover effects */}
                                 <div
                                     className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-6">
-                                    <button className="w-full sm:w-auto px-8 py-4 bg-blue-600
+                                    <Link href='/trackers/individual-contest-tracker/1' className="w-full sm:w-auto px-8 py-4 bg-blue-600
                                         text-white rounded-2xl font-medium
                                         flex items-center justify-center gap-2 group
                                         transition-all duration-300
                                         hover:bg-blue-700 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25">
                                         See Leaderboard
-                                        <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1"/>
-                                    </button>
+                                        <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                                    </Link>
                                     <Link href='/events' className="w-full sm:w-auto px-8 py-4
                                         text-gray-900 dark:text-white rounded-2xl font-medium
                                         flex items-center justify-center gap-2 group
@@ -74,7 +74,7 @@ const HeroSection = () => {
                                         hover:scale-105">
                                         Participate Events
                                         <ChevronRight
-                                            className="w-5 h-5 transition-transform group-hover:translate-x-1"/>
+                                            className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                 </div>
 
@@ -105,12 +105,12 @@ const HeroSection = () => {
                                 <div
                                     className="flex items-center justify-between p-3 sm:p-4 bg-gray-900/90 border-b border-gray-800">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 rounded-full bg-red-500"/>
-                                        <div className="w-3 h-3 rounded-full bg-yellow-500"/>
-                                        <div className="w-3 h-3 rounded-full bg-green-500"/>
+                                        <div className="w-3 h-3 rounded-full bg-red-500" />
+                                        <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                                        <div className="w-3 h-3 rounded-full bg-green-500" />
                                     </div>
                                     <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
-                                        <Code2 className="w-4 h-4"/>
+                                        <Code2 className="w-4 h-4" />
                                         main.cpp
                                     </div>
                                 </div>
@@ -120,18 +120,17 @@ const HeroSection = () => {
                                     <pre className="text-xs sm:text-sm font-mono leading-6">
                                         <code>{`#include `}<span className="text-gray-300">{`<`}</span><span
                                             className="text-emerald-400">{`bits/stdc++.h`}</span><span
-                                            className="text-gray-300">{`>`}</span>{`
+                                                className="text-gray-300">{`>`}</span>{`
 using namespace std;
 `}<span className="text-fuchsia-400">{`#define`}</span>{` ll long long
-`}<span className="text-fuchsia-400">{`#define`}</span>{` endl `}<span className="text-amber-300">{`"\\n"`}</span>{`
-
-`}<span className="text-sky-400">{`signed`}</span><span className="text-yellow-300">{` main`}</span><span
-                                            className="text-gray-300">{`() {`}</span>{`
+`}{`
+`}<span className="text-sky-400">{`int`}</span><span className="text-yellow-300">{` main`}</span><span
+                                                className="text-gray-300">{`() {`}</span>{`
     ios_base::`}<span className="text-yellow-300">{`sync_with_stdio`}</span>{`(`}<span
-                                            className="text-amber-300">{`0`}</span>{`);
+                                                className="text-amber-300">{`0`}</span>{`);
     cin.`}<span className="text-yellow-300">{`tie`}</span>{`(`}<span className="text-amber-300">{`0`}</span>{`);
 
-    cout << `}<span className="text-amber-300">{`"Welcome to our Website"`}</span>{` << endl;
+    cout << `}<span className="text-amber-300">{`"Welcome to DIUACM Website"`}</span>{` << endl;
 }`}</code>
                                     </pre>
 
@@ -139,12 +138,12 @@ using namespace std;
                                     <div
                                         className="flex items-center justify-between text-xs text-gray-500 border-t border-gray-800 pt-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"/>
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                             <span className="hidden sm:inline">{currentTime}</span>
                                             <span className="sm:hidden">{currentTime.split(' ')[1]}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Terminal className="w-3 h-3"/>
+                                            <Terminal className="w-3 h-3" />
                                             @{currentUser}
                                         </div>
                                     </div>
