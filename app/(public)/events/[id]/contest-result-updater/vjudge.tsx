@@ -209,8 +209,9 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[500px] p-0 rounded-2xl border-2 border-blue-100/20 dark:border-blue-500/20">
-                <div className="p-8 space-y-6">
+            <DialogContent className="sm:max-w-[600px] p-0 rounded-2xl border-2 border-blue-100/20 dark:border-blue-500/20
+                max-h-[95vh] overflow-hidden flex flex-col">
+                <div className="p-4 sm:p-8 space-y-6 overflow-y-auto">
                     <DialogHeader className="space-y-3">
                         <DialogTitle className="text-3xl font-bold tracking-tight">
                             Update Vjudge Results
@@ -330,7 +331,7 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
 
                 <Separator />
 
-                <div className="p-6">
+                <div className="p-4 sm:p-6 mt-auto">
                     <div className="flex flex-col sm:flex-row gap-3">
                         <Button
                             variant={validatedUsername ? "outline" : "secondary"}

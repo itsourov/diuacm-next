@@ -214,6 +214,6 @@ function getVjudgeContestId(url: string): string {
 }
 
 function getCodeforcesContestId(url: string): string {
-  const match = url.match(/contest\/(\d+)/);
+  const match = url.match(/contests\/(\d+)/);
   return match ? match[1] : "";
 }

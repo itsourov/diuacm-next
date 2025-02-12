@@ -23,6 +23,15 @@ class CodeforcesAPIError extends Error {
     }
 }
 
+interface CodeforcesError {
+    status: "FAILED";
+    comment: string;
+}
+
+function isCodeforcesError(data: any): data is CodeforcesError {
+    return data && data.status === "FAILED" && typeof data.comment === "string";
+}
+
 const getContestStandings = cache(async (
     contestId: string,
     handles: string[]
@@ -42,20 +51,26 @@ const getContestStandings = cache(async (
             headers: { 'Content-Type': 'application/json' }
         });
 
-        if (!response.ok) {
-            console.log(url);
-
-            throw new CodeforcesAPIError(`${response.body}`);
-        }
-
         const data = await response.json();
 
-        if (data.status !== "OK" || !data.result) {
-            throw new CodeforcesAPIError(data.comment || 'API request failed');
+        // Check for Codeforces API error response
+        if (isCodeforcesError(data)) {
+            throw new CodeforcesAPIError(
+                data.comment.replace(/handles: /, '')
+            );
+        }
+
+        if (!response.ok || data.status !== "OK" || !data.result) {
+            throw new CodeforcesAPIError(
+                'Failed to fetch data from Codeforces API'
+            );
         }
 
         return data;
     } catch (error) {
+        if (error instanceof CodeforcesAPIError) {
+            throw error;
+        }
         throw new CodeforcesAPIError(
             `Failed to fetch standings: ${error instanceof Error ? error.message : String(error)}`
         );
@@ -118,7 +133,8 @@ function processUserResults(
 
 export async function updateCodeforcesResults(
     eventId: bigint,
-    contestId: string
+    contestId: string,
+    singleUserId?: string // New parameter for single user update
 ): Promise<UpdateResultsResponse> {
     try {
         const event = await prisma.event.findUnique({
@@ -164,15 +180,24 @@ export async function updateCodeforcesResults(
             return { success: false, error: "No users with Codeforces handles found" };
         }
 
+        // Filter users based on singleUserId if provided
+        let filteredUsers = users;
+        if (singleUserId) {
+            filteredUsers = users.filter(user => user.id === singleUserId);
+            if (filteredUsers.length === 0) {
+                return { success: false, error: "User not found or no Codeforces handle set" };
+            }
+        }
+
         const standings = await getContestStandings(
             contestId,
-            users.map(u => u.codeforcesHandle)
+            filteredUsers.map(u => u.codeforcesHandle)
         );
 
         const processedResults: Record<string, ProcessedResult> = {};
 
         // Process results for each user
-        users.forEach(user => {
+        filteredUsers.forEach(user => {
             processedResults[user.codeforcesHandle] = processUserResults(
                 user.codeforcesHandle,
                 standings
@@ -187,7 +212,7 @@ export async function updateCodeforcesResults(
             });
 
             // Create new solve stats
-            await Promise.all(users.map(user => {
+            await Promise.all(filteredUsers.map(user => {
                 const stats = processedResults[user.codeforcesHandle];
 
                 return tx.solveStat.create({
@@ -208,11 +233,13 @@ export async function updateCodeforcesResults(
     } catch (error) {
         console.error("Update error:", error);
 
-        return {
-            success: false,
-            error: error instanceof CodeforcesAPIError
-                ? error.message
-                : `Failed to update results: ${error instanceof Error ? error.message : 'Unknown error'}`
-        };
+        let errorMessage = "Failed to update results";
+        if (error instanceof CodeforcesAPIError) {
+            errorMessage = error.message;
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+
+        return { success: false, error: errorMessage };
     }
 }

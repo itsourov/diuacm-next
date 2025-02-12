@@ -27,6 +27,7 @@ interface CodeforcesResultsDialogProps {
     eventId: bigint;
     contestId: string;
     currentUser?: string;
+    userId?: string; // Add userId prop
 }
 
 function StatusInfo({ currentUser }: { currentUser?: string }) {
@@ -64,20 +65,33 @@ function StatusInfo({ currentUser }: { currentUser?: string }) {
     );
 }
 
-export function CodeforcesResultsDialog({ eventId, contestId, currentUser }: CodeforcesResultsDialogProps) {
+export function CodeforcesResultsDialog({ eventId, contestId, currentUser, userId }: CodeforcesResultsDialogProps) {
     const [open, setOpen] = useState<boolean>(false);
-    const [isUpdating, setIsUpdating] = useState<boolean>(false);
+    const [isUpdatingAll, setIsUpdatingAll] = useState<boolean>(false);
+    const [isUpdatingSelf, setIsUpdatingSelf] = useState<boolean>(false);
 
-    const handleUpdateResults = async () => {
-        if (isUpdating) return;
+    const handleUpdateResults = async (updateSelf: boolean = false) => {
+        if (isUpdatingAll || isUpdatingSelf) return;
+        if (updateSelf && !userId) {
+            toast.error("Authentication Required", {
+                description: "Please log in to update your results.",
+            });
+            return;
+        }
 
         try {
-            setIsUpdating(true);
-            const result = await updateCodeforcesResults(eventId, contestId);
+            const setLoading = updateSelf ? setIsUpdatingSelf : setIsUpdatingAll;
+            setLoading(true);
+
+            const result = await updateCodeforcesResults(
+                eventId,
+                contestId,
+                updateSelf ? userId : undefined
+            );
 
             if (result.success) {
                 toast.success("Results Updated", {
-                    description: "Contest results have been successfully updated.",
+                    description: `Contest results have been successfully updated for ${updateSelf ? 'you' : 'all participants'}.`,
                 });
                 setOpen(false);
             } else {
@@ -90,13 +104,14 @@ export function CodeforcesResultsDialog({ eventId, contestId, currentUser }: Cod
                 description: error instanceof Error ? error.message : "An unexpected error occurred",
             });
         } finally {
-            setIsUpdating(false);
+            const setLoading = updateSelf ? setIsUpdatingSelf : setIsUpdatingAll;
+            setLoading(false);
         }
     };
 
     return (
         <Dialog open={open} onOpenChange={(newOpen) => {
-            if (isUpdating) return;
+            if (isUpdatingAll || isUpdatingSelf) return;
             setOpen(newOpen);
         }}>
             <DialogTrigger asChild>
@@ -117,8 +132,9 @@ export function CodeforcesResultsDialog({ eventId, contestId, currentUser }: Cod
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[500px] p-0 rounded-2xl border-2 border-blue-100/20 dark:border-blue-500/20">
-                <div className="p-8 space-y-6">
+            <DialogContent className="sm:max-w-[600px] p-0 rounded-2xl border-2 border-blue-100/20 dark:border-blue-500/20
+                max-h-[95vh] overflow-hidden flex flex-col">
+                <div className="p-4 sm:p-8 space-y-6 overflow-y-auto">
                     <DialogHeader className="space-y-3">
                         <DialogTitle className="text-3xl font-bold tracking-tight">
                             Update Codeforces Results
@@ -174,28 +190,50 @@ export function CodeforcesResultsDialog({ eventId, contestId, currentUser }: Cod
 
                 <Separator />
 
-                <div className="p-6">
-                    <Button
-                        onClick={() => void handleUpdateResults()}
-                        disabled={isUpdating}
-                        className="w-full h-12 text-base font-medium rounded-xl text-white dark:text-white
-                            bg-gradient-to-r from-blue-600 to-purple-600
-                            hover:from-blue-700 hover:to-purple-700
-                            disabled:from-gray-600 disabled:to-gray-600
-                            transition-all duration-300"
-                    >
-                        {isUpdating ? (
-                            <>
-                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                Updating Results...
-                            </>
-                        ) : (
-                            <>
-                                <RefreshCcw className="mr-2 h-5 w-5" />
-                                Start Update
-                            </>
-                        )}
-                    </Button>
+                <div className="p-4 sm:p-6 mt-auto">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <Button
+                            onClick={() => void handleUpdateResults(true)}
+                            disabled={isUpdatingAll || isUpdatingSelf || !userId}
+                            variant="outline"
+                            className="flex-1 h-12 text-base font-medium rounded-xl transition-all
+                                hover:bg-secondary"
+                        >
+                            {isUpdatingSelf ? (
+                                <>
+                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                    Updating Your Stats...
+                                </>
+                            ) : (
+                                <>
+                                    <RefreshCcw className="mr-2 h-5 w-5" />
+                                    Update Self Stats
+                                </>
+                            )}
+                        </Button>
+
+                        <Button
+                            onClick={() => void handleUpdateResults(false)}
+                            disabled={isUpdatingAll || isUpdatingSelf}
+                            className="flex-1 h-12 text-base font-medium rounded-xl text-white dark:text-white
+                                bg-gradient-to-r from-blue-600 to-purple-600
+                                hover:from-blue-700 hover:to-purple-700
+                                disabled:from-gray-600 disabled:to-gray-600
+                                transition-all duration-300"
+                        >
+                            {isUpdatingAll ? (
+                                <>
+                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                    Updating All Stats...
+                                </>
+                            ) : (
+                                <>
+                                    <RefreshCcw className="mr-2 h-5 w-5" />
+                                    Update All Stats
+                                </>
+                            )}
+                        </Button>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
