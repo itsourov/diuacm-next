@@ -1,9 +1,9 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import {useTheme} from 'next-themes';
-import {usePathname, useRouter} from 'next/navigation';
+import { useTheme } from 'next-themes';
+import { usePathname, useRouter } from 'next/navigation';
 import {
     Menu,
     X,
@@ -18,9 +18,9 @@ import {
     User as UserIcon,
     Settings,
 } from 'lucide-react';
-import {useSession, signOut} from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 interface NavLink {
     name: string;
@@ -36,11 +36,11 @@ interface UserNavItem {
 }
 
 const navLinks: NavLink[] = [
-    {name: 'Home', href: '/', icon: Home},
-    {name: 'Events', href: '/events', icon: Calendar},
-    {name: 'Trackers', href: '/trackers', icon: Calendar},
-    {name: 'Blog', href: '/blog', icon: BookOpen},
-    {name: 'Gallery', href: '/gallery', icon: Gallery},
+    { name: 'Home', href: '/', icon: Home },
+    { name: 'Events', href: '/events', icon: Calendar },
+    { name: 'Trackers', href: '/trackers', icon: Calendar },
+    { name: 'Blog', href: '/blog', icon: BookOpen },
+    { name: 'Contest Success', href: '/contest-success', icon: Gallery },
 ];
 
 
@@ -48,8 +48,8 @@ export default function Navbar() {
     const [mounted, setMounted] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
-    const {theme, setTheme} = useTheme();
-    const {data: session, status} = useSession();
+    const { theme, setTheme } = useTheme();
+    const { data: session, status } = useSession();
     const pathname = usePathname();
 
     useEffect(() => setMounted(true), []);
@@ -84,14 +84,14 @@ export default function Navbar() {
     const router = useRouter();
 
     const handleSignOut = async () => {
-        await signOut({redirect: false});
+        await signOut({ redirect: false });
         router.refresh();
         toast.success('Signed out successfully');
     };
 
     const userNavItems: UserNavItem[] = [
-        {name: 'Profile', href: '/', icon: UserIcon},
-        {name: 'Manage Account', href: '/manage-account', icon: Settings},
+        { name: 'Profile', href: '/', icon: UserIcon },
+        { name: 'Manage Account', href: '/manage-account', icon: Settings },
         {
             name: 'Sign out',
             icon: LogOut,
@@ -110,7 +110,7 @@ export default function Navbar() {
                         href="/"
                         className="flex items-center space-x-2 hover:opacity-90 transition-opacity"
                     >
-                        <Terminal className="h-6 w-6 text-blue-600 dark:text-blue-500"/>
+                        <Terminal className="h-6 w-6 text-blue-600 dark:text-blue-500" />
                         <span className="text-xl font-bold text-blue-600 dark:text-blue-500">
                             DIUACM
                         </span>
@@ -129,12 +129,12 @@ export default function Navbar() {
                                         flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium
                                         transition-colors duration-150 ease-in-out
                                         ${active
-                                        ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                                    }
+                                            ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                        }
                                     `}
                                 >
-                                    <Icon className="h-4 w-4"/>
+                                    <Icon className="h-4 w-4" />
                                     <span>{link.name}</span>
                                 </Link>
                             );
@@ -149,13 +149,13 @@ export default function Navbar() {
                             aria-label="Toggle theme"
                         >
                             {mounted && (theme === 'dark'
-                                    ? <Sun className="h-5 w-5"/>
-                                    : <Moon className="h-5 w-5"/>
+                                ? <Sun className="h-5 w-5" />
+                                : <Moon className="h-5 w-5" />
                             )}
                         </button>
 
                         {status === 'loading' ? (
-                            <div className="h-8 w-8 rounded-md bg-gray-200 dark:bg-gray-800 animate-pulse"/>
+                            <div className="h-8 w-8 rounded-md bg-gray-200 dark:bg-gray-800 animate-pulse" />
                         ) : !session ? (
                             <Link
                                 href="/login"
@@ -216,7 +216,7 @@ export default function Navbar() {
                                                     "
                                                     onClick={() => setShowUserMenu(false)}
                                                 >
-                                                    <item.icon className="h-4 w-4"/>
+                                                    <item.icon className="h-4 w-4" />
                                                     <span>{item.name}</span>
                                                 </Link>
                                             ) : (
@@ -230,7 +230,7 @@ export default function Navbar() {
                                                         transition-colors duration-150
                                                     "
                                                 >
-                                                    <item.icon className="h-4 w-4"/>
+                                                    <item.icon className="h-4 w-4" />
                                                     <span>{item.name}</span>
                                                 </button>
                                             )
@@ -248,7 +248,7 @@ export default function Navbar() {
                         className="md:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
                         aria-label="Open menu"
                     >
-                        <Menu className="h-6 w-6"/>
+                        <Menu className="h-6 w-6" />
                     </button>
                 </div>
             </div>
@@ -279,7 +279,7 @@ export default function Navbar() {
                                 onClick={() => setIsOpen(false)}
                                 className="p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
                             >
-                                <X className="h-5 w-5"/>
+                                <X className="h-5 w-5" />
                             </button>
                         </div>
 
@@ -328,12 +328,12 @@ export default function Navbar() {
                                         className={`
                                             flex items-center space-x-2 px-3 py-2 rounded-md mb-1
                                             ${active
-                                            ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                                        }
+                                                ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400'
+                                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                            }
                                         `}
                                     >
-                                        <Icon className="h-5 w-5"/>
+                                        <Icon className="h-5 w-5" />
                                         <span>{link.name}</span>
                                     </Link>
                                 );
@@ -353,7 +353,7 @@ export default function Navbar() {
                                                     hover:bg-gray-100 dark:hover:bg-gray-800
                                                 "
                                             >
-                                                <item.icon className="h-5 w-5"/>
+                                                <item.icon className="h-5 w-5" />
                                                 <span>{item.name}</span>
                                             </Link>
                                         ) : (
@@ -369,7 +369,7 @@ export default function Navbar() {
                                                     hover:bg-red-50 dark:hover:bg-red-900/20
                                                 "
                                             >
-                                                <item.icon className="h-5 w-5"/>
+                                                <item.icon className="h-5 w-5" />
                                                 <span>{item.name}</span>
                                             </button>
                                         )
@@ -387,8 +387,8 @@ export default function Navbar() {
                                     aria-label="Toggle theme"
                                 >
                                     {mounted && (theme === 'dark'
-                                            ? <Sun className="h-5 w-5"/>
-                                            : <Moon className="h-5 w-5"/>
+                                        ? <Sun className="h-5 w-5" />
+                                        : <Moon className="h-5 w-5" />
                                     )}
                                 </button>
                             </div>
