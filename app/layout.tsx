@@ -28,6 +28,8 @@ export default function RootLayout({
                     defaultTheme="system"
                     enableSystem
                     disableTransitionOnChange
+                    data-cfasync="false"
+
                 >
                     <SessionProvider>
                         <Navbar />
