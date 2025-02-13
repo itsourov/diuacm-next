@@ -1,14 +1,14 @@
-import type {Metadata} from 'next';
-import {Inter} from 'next/font/google';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
-import {ThemeProvider} from '@/providers/ThemeProvider';
-import {Toaster} from "@/components/ui/toaster";
-import {Toaster as Toaster2} from 'sonner';
-import {SessionProvider} from "next-auth/react";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Toaster2 } from 'sonner';
+import { SessionProvider } from "next-auth/react";
 import Navbar from "@/components/Navbar";
+import { ThemeProvider } from 'next-themes';
 
 
-const inter = Inter({subsets: ['latin']});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
     title: 'DIU ACM',
@@ -16,29 +16,29 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-                                       children,
-                                   }: {
+    children,
+}: {
     children: React.ReactNode;
 }) {
     return (
         <html lang="en" suppressHydrationWarning>
-        <body className={inter.className}>
-        <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-        >
-            <SessionProvider>
-                <Navbar/>
-                <main className="pt-16">
-                    {children}
-                </main>
-                <Toaster/>
-                <Toaster2 richColors/>
-            </SessionProvider>
-        </ThemeProvider>
-        </body>
+            <body className={inter.className}>
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    <SessionProvider>
+                        <Navbar />
+                        <main className="pt-16">
+                            {children}
+                        </main>
+                        <Toaster />
+                        <Toaster2 richColors />
+                    </SessionProvider>
+                </ThemeProvider>
+            </body>
         </html>
     );
 }
