@@ -18,10 +18,22 @@ export default function RegisterPage() {
                     </div>
 
                     {/* Information Message */}
-                    <div className="mb-8 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                        <p className="text-sm text-blue-800 dark:text-blue-200">
-                            To ensure the authenticity of our community members, we currently only accept registrations through DIU email addresses (@diu.edu.bd or @s.diu.edu.bd). Please use the Google sign-in option below with your DIU email account.
-                        </p>
+                    <div className="mb-8 space-y-4">
+                        <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                            <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
+                                Important Registration Instructions:
+                            </h3>
+                            <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800 dark:text-blue-200">
+                                <li>Use your DIU email address (@diu.edu.bd or @s.diu.edu.bd)</li>
+                                <li>Set a password for you account after creating a new account.  </li>
+                                <li>Keep your credentials safe - you&apos;ll need them for contest attendance. </li>
+                            </ol>
+                        </div>
+                        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+                            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                                <strong>Note:</strong> Personal Gmail accounts are not accepted. You must use your official DIU email address for registration.
+                            </p>
+                        </div>
                     </div>
 
                     {/* Social Login Button */}
