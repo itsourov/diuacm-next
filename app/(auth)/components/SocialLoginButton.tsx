@@ -32,7 +32,7 @@ export default function SocialLoginButton({ provider, label }: SocialLoginButton
     const handleClick = async () => {
         try {
             setIsLoading(true);
-            await signIn(provider, { redirectTo: '/blog' });
+            await signIn(provider, { redirectTo: '/manage-account' });
         } catch (error) {
             toast.error('Social login error:' + error);
             setIsLoading(false);

@@ -1,7 +1,6 @@
 // app/(auth)/register/page.tsx
 import Link from 'next/link';
 import SocialLoginButton from "@/app/(auth)/components/SocialLoginButton";
-import RegisterForm from "@/app/(auth)/register/RegisterForm";
 
 export default function RegisterPage() {
     return (
@@ -14,26 +13,19 @@ export default function RegisterPage() {
                             Create an Account
                         </h2>
                         <p className="text-gray-600 dark:text-gray-400">
-                            Join our community
+                            Join our community using your DIU email
                         </p>
                     </div>
 
-                    <RegisterForm />
-
-                    {/* Divider */}
-                    <div className="mt-6 relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300 dark:border-gray-600" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-                                Or continue with
-                            </span>
-                        </div>
+                    {/* Information Message */}
+                    <div className="mb-8 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                        <p className="text-sm text-blue-800 dark:text-blue-200">
+                            To ensure the authenticity of our community members, we currently only accept registrations through DIU email addresses (@diu.edu.bd or @s.diu.edu.bd). Please use the Google sign-in option below with your DIU email account.
+                        </p>
                     </div>
 
                     {/* Social Login Button */}
-                    <div className="mt-6 w-full">
+                    <div className="w-full">
                         <SocialLoginButton
                             provider="google"
                             label="Register using Google"
