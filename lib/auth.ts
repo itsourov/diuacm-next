@@ -1,18 +1,17 @@
-// Code: lib/auth.ts
-import {v4 as uuid} from "uuid";
-import {encode as defaultEncode} from "next-auth/jwt";
+import { v4 as uuid } from "uuid";
+import { encode as defaultEncode } from "next-auth/jwt";
 
-import {prisma} from "@/lib/prisma";
-import {PrismaAdapter} from "@auth/prisma-adapter";
-import NextAuth, {Profile, User} from "next-auth";
+import { prisma } from "@/lib/prisma";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import NextAuth, { Profile, User } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import {loginSchema} from "@/lib/schemas/login";
+import { loginSchema } from "@/lib/schemas/login";
 import bcrypt from "bcryptjs";
 import Google from "@auth/core/providers/google";
 
 const adapter = PrismaAdapter(prisma);
 
-export const {handlers, signIn, signOut, auth} = NextAuth({
+export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter,
     pages: {
         signIn: '/login',
@@ -21,7 +20,6 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
     providers: [
         Google({
             profile(profile: Profile): User {
-
                 return {
                     id: profile.sub,
                     name: profile.name,
@@ -34,21 +32,21 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         }),
         Credentials({
             credentials: {
-                identifier: {label: "Email or Username", type: "text"},
-                password: {label: "Password", type: "password"}
+                identifier: { label: "Email or Username", type: "text" },
+                password: { label: "Password", type: "password" }
             },
             authorize: async (credentials) => {
                 const validatedCredentials = loginSchema.safeParse(credentials);
 
                 if (!validatedCredentials.success) return null;
 
-                const {identifier, password} = validatedCredentials.data;
+                const { identifier, password } = validatedCredentials.data;
 
                 const user = await prisma.user.findFirst({
                     where: {
                         OR: [
-                            {email: identifier},
-                            {username: identifier}
+                            { email: identifier },
+                            { username: identifier }
                         ]
                     },
                     select: {
@@ -69,15 +67,56 @@ export const {handlers, signIn, signOut, auth} = NextAuth({
         }),
     ],
     callbacks: {
-        async signIn({account, profile}) {
+        async signIn({ account, profile, user }) {
             if (account?.provider === "google") {
                 const email = profile?.email;
-                return !!(email &&
-                    (email.endsWith("@diu.edu.bd") || email.endsWith("@s.diu.edu.bd")|| email.endsWith("@gmail.com") ));
+
+                // Check if email domain is allowed
+                if (!email || !(email.endsWith("@diu.edu.bd") ||
+                    email.endsWith("@s.diu.edu.bd"))) {
+                    return false;
+                }
+
+                // Check if there's an existing user with this email
+                const existingUser = await prisma.user.findUnique({
+                    where: { email },
+                    include: {
+                        accounts: {
+                            where: {
+                                provider: "google"
+                            }
+                        }
+                    }
+                });
+
+                if (existingUser) {
+                    // If user exists but doesn't have a Google account linked,
+                    // we'll create the link
+                    if (existingUser.accounts.length === 0) {
+                        await prisma.account.create({
+                            data: {
+                                userId: existingUser.id,
+                                type: account.type,
+                                provider: account.provider,
+                                providerAccountId: account.providerAccountId,
+                                access_token: account.access_token,
+                                expires_at: account.expires_at,
+                                token_type: account.token_type,
+                                scope: account.scope,
+                                id_token: account.id_token,
+                                session_state: account.session_state?.toString(),
+                            }
+                        });
+                    }
+                    // Set the user ID to the existing user's ID
+                    user.id = existingUser.id;
+                }
+
+                return true;
             }
             return true;
         },
-        async jwt({token, account}) {
+        async jwt({ token, account }) {
             if (account?.provider === "credentials") {
                 token.credentials = true;
             }
