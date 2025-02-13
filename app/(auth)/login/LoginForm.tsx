@@ -1,13 +1,14 @@
 // app/(auth)/components/LoginForm.tsx
 "use client"
-import {useForm} from "react-hook-form";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {loginSchema, LoginFormData} from "@/lib/schemas/login";
-import {useState} from "react";
-import {toast} from "sonner";
-import {useRouter} from "next/navigation";
-import {AtSign, Lock, Loader2} from "lucide-react";
-import {signIn} from "next-auth/react"; // Change this import
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, LoginFormData } from "@/lib/schemas/login";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { AtSign, Lock, Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react"; // Change this import
+import Link from "next/link";
 
 export default function LoginForm() {
     const router = useRouter();
@@ -16,7 +17,7 @@ export default function LoginForm() {
     const {
         register,
         handleSubmit,
-        formState: {errors},
+        formState: { errors },
     } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
     });
@@ -55,15 +56,14 @@ export default function LoginForm() {
                 </label>
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <AtSign className="h-5 w-5 text-gray-400"/>
+                        <AtSign className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         {...register('identifier')}
                         type="text"
                         autoComplete="username"
-                        className={`block w-full pl-10 pr-3 py-2 border ${
-                            errors.identifier ? 'border-red-500' : 'border-gray-300'
-                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                        className={`block w-full pl-10 pr-3 py-2 border ${errors.identifier ? 'border-red-500' : 'border-gray-300'
+                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                         placeholder="Username or email"
                     />
                 </div>
@@ -79,15 +79,14 @@ export default function LoginForm() {
                 </label>
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-gray-400"/>
+                        <Lock className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         {...register('password')}
                         type="password"
                         autoComplete="current-password"
-                        className={`block w-full pl-10 pr-3 py-2 border ${
-                            errors.password ? 'border-red-500' : 'border-gray-300'
-                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                        className={`block w-full pl-10 pr-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'
+                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                         placeholder="••••••••"
                     />
                 </div>
@@ -99,10 +98,12 @@ export default function LoginForm() {
             {/* Forgot Password */}
             <div className="flex items-center justify-end">
                 <div className="text-sm">
-                    <a href="/forgot-password"
-                       className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
+                    <Link
+                        href="/forgot-password"
+                        className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                    >
                         Forgot your password?
-                    </a>
+                    </Link>
                 </div>
             </div>
 
@@ -112,7 +113,7 @@ export default function LoginForm() {
                 className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin"/>
+                    <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                     'Sign in'
                 )}
