@@ -1,18 +1,19 @@
-// app/(auth)/components/LoginForm.tsx
 "use client"
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormData } from "@/lib/schemas/login";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AtSign, Lock, Loader2 } from "lucide-react";
-import { signIn } from "next-auth/react"; // Change this import
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 
 export default function LoginForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
+    const callbackUrl = searchParams.get('callbackUrl') || '/';
 
     const {
         register,
@@ -30,6 +31,7 @@ export default function LoginForm() {
                 identifier: data.identifier,
                 password: data.password,
                 redirect: false,
+                callbackUrl,
             });
 
             if (result?.error) {
@@ -38,7 +40,8 @@ export default function LoginForm() {
             }
 
             toast.success("Logged in successfully");
-            router.push('/');
+            router.push(callbackUrl);
+            router.refresh();
 
         } catch (error) {
             toast.error("Something went wrong. " + error);

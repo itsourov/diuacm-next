@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { Loader2 } from 'lucide-react';
 import { toast } from "sonner";
+import { useSearchParams } from 'next/navigation';
 
 interface SocialLoginButtonProps {
     provider: 'google';
@@ -28,11 +29,15 @@ const GoogleIcon = () => (
 
 export default function SocialLoginButton({ provider, label }: SocialLoginButtonProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get('callbackUrl') || '/';
 
     const handleClick = async () => {
         try {
             setIsLoading(true);
-            await signIn(provider, { redirectTo: '/manage-account' });
+            await signIn(provider, {
+                callbackUrl,
+            });
         } catch (error) {
             toast.error('Social login error:' + error);
             setIsLoading(false);

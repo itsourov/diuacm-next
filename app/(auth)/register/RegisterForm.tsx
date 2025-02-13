@@ -1,11 +1,11 @@
 // app/(auth)/components/RegisterForm.tsx
 "use client"
-import React, {useState} from 'react';
-import {z} from 'zod';
-import {useForm} from 'react-hook-form';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {signIn} from 'next-auth/react';
-import {useRouter} from 'next/navigation';
+import React, { useState } from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Mail,
     Lock,
@@ -13,22 +13,24 @@ import {
     User,
     AtSign
 } from 'lucide-react';
-import {toast} from 'sonner';
-import {registerSchema} from "@/lib/schemas/register";
-import {FieldErrors, registerUser} from "@/app/(auth)/register/action";
+import { toast } from 'sonner';
+import { registerSchema } from "@/lib/schemas/register";
+import { FieldErrors, registerUser } from "@/app/(auth)/register/action";
 
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+    const callbackUrl = searchParams.get('callbackUrl') || '/';
 
     const {
         register,
         handleSubmit,
-        formState: {errors},
+        formState: { errors },
     } = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
     });
@@ -57,6 +59,7 @@ export default function RegisterForm() {
                     redirect: false,
                     identifier: data.email,
                     password: data.password,
+                    callbackUrl,
                 });
 
                 if (signInResult?.error) {
@@ -64,7 +67,8 @@ export default function RegisterForm() {
                     return;
                 }
 
-                router.push('/');
+                router.push(callbackUrl);
+                router.refresh();
             }
         } catch (error) {
             toast.error('An unexpected error occurred' + error);
@@ -82,14 +86,13 @@ export default function RegisterForm() {
                 </label>
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-gray-400"/>
+                        <User className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         {...register('name')}
                         type="text"
-                        className={`block w-full pl-10 pr-3 py-2 border ${
-                            errors.name ? 'border-red-500' : 'border-gray-300'
-                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                        className={`block w-full pl-10 pr-3 py-2 border ${errors.name ? 'border-red-500' : 'border-gray-300'
+                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                         placeholder="John Doe"
                     />
                 </div>
@@ -105,14 +108,13 @@ export default function RegisterForm() {
                 </label>
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <AtSign className="h-5 w-5 text-gray-400"/>
+                        <AtSign className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         {...register('username')}
                         type="text"
-                        className={`block w-full pl-10 pr-3 py-2 border ${
-                            errors.username || fieldErrors.username ? 'border-red-500' : 'border-gray-300'
-                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                        className={`block w-full pl-10 pr-3 py-2 border ${errors.username || fieldErrors.username ? 'border-red-500' : 'border-gray-300'
+                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                         placeholder="johndoe123"
                     />
                 </div>
@@ -130,14 +132,13 @@ export default function RegisterForm() {
                 </label>
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-gray-400"/>
+                        <Mail className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         {...register('email')}
                         type="email"
-                        className={`block w-full pl-10 pr-3 py-2 border ${
-                            errors.email || fieldErrors.email ? 'border-red-500' : 'border-gray-300'
-                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                        className={`block w-full pl-10 pr-3 py-2 border ${errors.email || fieldErrors.email ? 'border-red-500' : 'border-gray-300'
+                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                         placeholder="you@example.com"
                     />
                 </div>
@@ -155,14 +156,13 @@ export default function RegisterForm() {
                 </label>
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-gray-400"/>
+                        <Lock className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         {...register('password')}
                         type="password"
-                        className={`block w-full pl-10 pr-3 py-2 border ${
-                            errors.password ? 'border-red-500' : 'border-gray-300'
-                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                        className={`block w-full pl-10 pr-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'
+                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                         placeholder="••••••••"
                     />
                 </div>
@@ -178,14 +178,13 @@ export default function RegisterForm() {
                 </label>
                 <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-gray-400"/>
+                        <Lock className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
                         {...register('confirmPassword')}
                         type="password"
-                        className={`block w-full pl-10 pr-3 py-2 border ${
-                            errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                        className={`block w-full pl-10 pr-3 py-2 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                            } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                         placeholder="••••••••"
                     />
                 </div>
@@ -200,7 +199,7 @@ export default function RegisterForm() {
                 className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin"/>
+                    <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                     'Create Account'
                 )}
