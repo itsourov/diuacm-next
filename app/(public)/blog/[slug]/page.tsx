@@ -5,9 +5,7 @@ import Image from "next/image";
 import { Calendar, Clock } from "lucide-react";
 
 interface BlogPostPageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;  // Changed to Promise
 }
 
 export async function generateStaticParams() {
@@ -17,8 +15,9 @@ export async function generateStaticParams() {
   }));
 }
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = getBlogPost(params.slug);
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const resolvedParams = await params;  // Await params here
+  const post = getBlogPost(resolvedParams.slug);
   if (!post) notFound();
 
   return (
