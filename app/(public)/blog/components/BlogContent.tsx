@@ -8,6 +8,8 @@ import 'katex/dist/katex.min.css';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Image from 'next/image';
+import Link from "next/link";
+
 
 interface BlogContentProps {
   content: string;
@@ -75,7 +77,7 @@ export default function BlogContent({ content }: BlogContentProps) {
         h4: (props) => <h4 className="text-xl font-bold mt-6 mb-3" {...props} />,
         // Custom paragraph and link styles
         a: (props) => (
-          <a
+          <Link
             className="text-blue-600 dark:text-blue-400 hover:underline"
             {...props}
           />
