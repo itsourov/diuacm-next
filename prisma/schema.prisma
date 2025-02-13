@@ -184,6 +184,7 @@ model Session {
 }
 
 model VerificationToken {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
   identifier String
   token      String
   expires    DateTime

@@ -32,7 +32,7 @@ function processVjudgeData(data: VjudgeContestData): ProcessedContestData {
     const timeLimit = data.length / 1000;
     const processed: ProcessedContestData = {};
 
-    // Initialize user stats
+    // Initialize user stats (same as before)
     Object.entries(data.participants).forEach(([, participant]) => {
         const username = participant[0];
         processed[username] = {
@@ -43,7 +43,7 @@ function processVjudgeData(data: VjudgeContestData): ProcessedContestData {
         };
     });
 
-    // Process submissions if they exist
+    // First pass: Process in-time submissions
     if (Array.isArray(data.submissions)) {
         data.submissions.forEach(([participantId, problemIndex, isAccepted, timestamp]) => {
             const participant = data.participants[participantId.toString()];
@@ -53,15 +53,33 @@ function processVjudgeData(data: VjudgeContestData): ProcessedContestData {
             const userStats = processed[username];
             if (!userStats) return;
 
+            if (timestamp > timeLimit) return;
             userStats.absent = false;
 
-            if (isAccepted === 1 && !userStats.solved[problemIndex]) {
-                if (timestamp <= timeLimit) {
+            if (isAccepted === 1) {
+                if (!userStats.solved[problemIndex]) {
                     userStats.solveCount += 1;
-                } else {
-                    userStats.upSolveCount += 1;
+                    userStats.solved[problemIndex] = 1;
                 }
-                userStats.solved[problemIndex] = 1;
+            }
+        });
+    }
+
+    // Second pass: Process upsolve submissions
+    if (Array.isArray(data.submissions)) {
+        data.submissions.forEach(([participantId, problemIndex, isAccepted, timestamp]) => {
+            const participant = data.participants[participantId.toString()];
+            if (!participant) return;
+
+            const username = participant[0];
+            const userStats = processed[username];
+            if (!userStats) return;
+
+            if (isAccepted === 1 && timestamp > timeLimit) {
+                if (!userStats.solved[problemIndex]) {
+                    userStats.upSolveCount += 1;
+                    userStats.solved[problemIndex] = 1;
+                }
             }
         });
     }
@@ -190,28 +208,43 @@ export async function updateVjudgeResults({
 
         const processedData = processVjudgeData(data as VjudgeContestData);
 
-        // Updated transaction to use new schema
-        await prisma.$transaction(async (tx) => {
-            // Delete existing solve stats for this event
-            await tx.solveStat.deleteMany({
-                where: { eventId: BigInt(eventId) }
-            });
+        // Helper function to chunk array
+        const chunkArray = <T>(array: T[], size: number): T[][] => {
+            return Array.from({ length: Math.ceil(array.length / size) }, (_, i) =>
+                array.slice(i * size, i * size + size)
+            );
+        };
 
-            // Create new solve stats
-            await Promise.all(users.map(user => {
-                const stats = user.vjudgeHandle ? processedData[user.vjudgeHandle] : null;
-
-                return tx.solveStat.create({
-                    data: {
-                        userId: user.id,
-                        eventId: BigInt(eventId),
-                        solveCount: BigInt(stats?.solveCount ?? 0),
-                        upsolveCount: BigInt(stats?.upSolveCount ?? 0),
-                        isPresent: !(stats?.absent ?? true),
-                    }
-                });
-            }));
+        // Delete existing solve stats outside transaction
+        await prisma.solveStat.deleteMany({
+            where: { eventId: BigInt(eventId) }
         });
+
+        // Process users in chunks of 10
+        const userChunks = chunkArray(users, 10);
+
+        for (const chunk of userChunks) {
+            await prisma.$transaction(
+                async (tx) => {
+                    await Promise.all(chunk.map(user => {
+                        const stats = user.vjudgeHandle ? processedData[user.vjudgeHandle] : null;
+
+                        return tx.solveStat.create({
+                            data: {
+                                userId: user.id,
+                                eventId: BigInt(eventId),
+                                solveCount: BigInt(stats?.solveCount ?? 0),
+                                upsolveCount: BigInt(stats?.upSolveCount ?? 0),
+                                isPresent: !(stats?.absent ?? true),
+                            }
+                        });
+                    }));
+                },
+                {
+                    timeout: 10000 // 10 second timeout
+                }
+            );
+        }
 
         log("Update completed successfully");
         revalidatePath(`/events/${eventId}`);
