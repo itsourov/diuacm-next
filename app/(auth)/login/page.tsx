@@ -31,15 +31,11 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    {/* Social Login Buttons */}
-                    <div className="mt-6 grid grid-cols-2 gap-4">
+                    {/* Social Login Button */}
+                    <div className="mt-6 w-full">
                         <SocialLoginButton
                             provider="google"
-                            label="Google"
-                        />
-                        <SocialLoginButton
-                            provider="github"
-                            label="GitHub"
+                            label="Login with Google"
                         />
                     </div>
 

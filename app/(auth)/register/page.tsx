@@ -14,7 +14,7 @@ export default function RegisterPage() {
                             Create an Account
                         </h2>
                         <p className="text-gray-600 dark:text-gray-400">
-                            Join our community today
+                            Join our community
                         </p>
                     </div>
 
@@ -32,15 +32,11 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Social Login Buttons */}
-                    <div className="mt-6 grid grid-cols-2 gap-4">
+                    {/* Social Login Button */}
+                    <div className="mt-6 w-full">
                         <SocialLoginButton
                             provider="google"
-                            label="Google"
-                        />
-                        <SocialLoginButton
-                            provider="github"
-                            label="GitHub"
+                            label="Register using Google"
                         />
                     </div>
 
