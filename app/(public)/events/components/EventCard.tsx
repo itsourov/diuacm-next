@@ -1,3 +1,4 @@
+"use client"
 import { Event, AttendanceScope } from '@prisma/client';
 import { isAfter, isWithinInterval } from 'date-fns';
 import Link from 'next/link';
