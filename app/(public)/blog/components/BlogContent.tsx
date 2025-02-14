@@ -36,7 +36,13 @@ export default function BlogContent({ content }: BlogContentProps) {
   };
 
   return (
-    <div className="markdown-content prose dark:prose-invert max-w-none prose-pre:p-0">
+    <div className="markdown-content prose dark:prose-invert max-w-none prose-pre:p-0 
+                    prose-headings:font-display prose-h1:text-4xl prose-h2:text-3xl 
+                    prose-h3:text-2xl prose-h4:text-xl prose-p:text-gray-700 
+                    dark:prose-p:text-gray-300 prose-a:text-blue-600 
+                    dark:prose-a:text-blue-400 hover:prose-a:text-blue-800 
+                    dark:hover:prose-a:text-blue-300 prose-img:rounded-lg 
+                    prose-img:shadow-md">
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
@@ -47,16 +53,18 @@ export default function BlogContent({ content }: BlogContentProps) {
             const code = String(children).replace(/\n$/, '');
 
             return !inline && match ? (
-              <div className="relative group">
-                {/* Language label */}
-                <div className="absolute right-4 top-4 flex items-center gap-2">
-                  <span className="text-xs text-gray-400 bg-gray-800/50 px-2 py-1 rounded">
+              <div className="relative group my-8">
+                <div className="absolute right-4 top-4 flex items-center gap-2 opacity-0 
+                              group-hover:opacity-100 transition-opacity">
+                  <span className="text-xs text-gray-400 bg-gray-800/70 px-2 py-1 rounded-md 
+                                 font-mono backdrop-blur-sm">
                     {language}
                   </span>
                   <button
                     onClick={() => handleCopy(code)}
-                    className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg 
-                             bg-gray-800/50 hover:bg-gray-700/50"
+                    className="p-2 text-gray-400 hover:text-white transition-all rounded-lg 
+                             bg-gray-800/70 hover:bg-gray-700/80 backdrop-blur-sm
+                             hover:scale-105 active:scale-95"
                     title="Copy code"
                   >
                     {copiedCode === code ? (
@@ -70,12 +78,14 @@ export default function BlogContent({ content }: BlogContentProps) {
                 <SyntaxHighlighter
                   style={coldarkDark}
                   language={language}
-
                   PreTag="div"
                   customStyle={{
                     margin: 0,
-                    borderRadius: '6px',
-                    paddingTop: '2.5rem',
+                    borderRadius: '0.75rem',
+                    padding: '2rem 1.5rem',
+                    paddingTop: '3rem',
+                    backgroundColor: 'rgb(17 24 39)',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
                   }}
                   {...props}
                 >
@@ -83,64 +93,79 @@ export default function BlogContent({ content }: BlogContentProps) {
                 </SyntaxHighlighter>
               </div>
             ) : (
-              <code className={className} {...props}>
+              <code className="px-1.5 py-0.5 rounded-md bg-gray-200 dark:bg-gray-800 
+                             font-mono text-sm" {...props}>
                 {children}
               </code>
             );
           },
           img({ src, alt }) {
-            // Return just the Image component without a wrapper
             return (
               <Image
                 src={src || ''}
                 alt={alt || ''}
                 width={1920}
                 height={1080}
-                className="w-full h-auto my-8"
+                className="w-full h-auto hover:scale-105 transition-transform duration-500 
+                          rounded-lg shadow-lg hover:shadow-xl my-8"
                 style={{ maxHeight: '80vh' }}
               />
             );
           },
           // Modify p component to handle images differently
           p({ children, ...props }) {
-            // Check if children is an image
             const hasOnlyImage = (Array.isArray(children)
               && children.length === 1
               && typeof children[0] === 'object'
               && 'type' in children[0]
               && children[0].type === 'img');
 
-            // If it's just an image, return the children directly without p wrapper
+            // If it's an image, wrap it in a div with the desired styles
             if (hasOnlyImage) {
-              return <>{children}</>;
+              return (
+                <div className="overflow-hidden my-8">
+                  {children}
+                </div>
+              );
             }
 
             // Otherwise return normal paragraph
-            return <p className="my-4 leading-relaxed" {...props}>{children}</p>;
+            return <p className="my-4 leading-relaxed text-gray-700 dark:text-gray-300" {...props}>{children}</p>;
           },
           // Custom heading styles
-          h1: (props) => <h1 className="text-4xl font-bold mt-8 mb-4" {...props} />,
-          h2: (props) => <h2 className="text-3xl font-bold mt-8 mb-4" {...props} />,
-          h3: (props) => <h3 className="text-2xl font-bold mt-6 mb-3" {...props} />,
+          h1: (props) => (
+            <h1 className="text-4xl font-bold mt-12 mb-6 text-gray-900 
+                          dark:text-white tracking-tight" {...props} />
+          ),
+          h2: (props) => (
+            <h2 className="text-3xl font-bold mt-10 mb-5 text-gray-800 
+                          dark:text-gray-100 tracking-tight" {...props} />
+          ),
+          h3: (props) => (
+            <h3 className="text-2xl font-bold mt-8 mb-4 text-gray-800 
+                          dark:text-gray-100" {...props} />
+          ),
           h4: (props) => <h4 className="text-xl font-bold mt-6 mb-3" {...props} />,
           // Custom paragraph and link styles
           a: (props) => (
-            <a
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-              {...props}
-            />
+            <a className="text-blue-600 dark:text-blue-400 hover:text-blue-800 
+                         dark:hover:text-blue-300 transition-colors duration-200 
+                         underline-offset-2 decoration-2" {...props} />
           ),
           // Custom list styles
-          ul: (props) => <ul className="list-disc list-inside my-4" {...props} />,
+          ul: (props) => (
+            <ul className="list-disc list-inside my-6 space-y-2 text-gray-700 
+                          dark:text-gray-300" {...props} />
+          ),
           ol: (props) => (
-            <ol className="list-decimal list-inside my-4" {...props} />
+            <ol className="list-decimal list-inside my-6 space-y-2 text-gray-700 
+                          dark:text-gray-300" {...props} />
           ),
           // Custom blockquote style
           blockquote: (props) => (
-            <blockquote
-              className="border-l-4 border-gray-300 dark:border-gray-600 pl-4 my-4 italic"
-              {...props}
-            />
+            <blockquote className="border-l-4 border-blue-500 dark:border-blue-400 
+                                  pl-4 my-6 italic text-gray-700 dark:text-gray-300 
+                                  bg-gray-50 dark:bg-gray-800/50 py-2 rounded-r-lg" {...props} />
           ),
           // Custom table styles - Use div wrapper for tables
           table: (props) => (
