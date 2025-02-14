@@ -88,7 +88,10 @@ export default function AttendanceSection({
 
         if (now > attendanceEndTime) {
             return {
-                message: "Attendance window has expired",
+                message: "Attendance time ended at " + DateTime.formatDisplay(attendanceEndTime, {
+                    format: 'local',
+                    includeTimezone: true
+                }),
                 icon: X,
                 className: "bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-100"
             };
