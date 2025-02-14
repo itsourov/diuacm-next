@@ -1,6 +1,6 @@
 // lib/s3.ts
-import {S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand} from "@aws-sdk/client-s3"
-import {randomUUID} from "crypto"
+import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3"
+import { randomUUID } from "crypto"
 
 // Define allowed mime types and their extensions
 export const ALLOWED_FILE_TYPES = {
@@ -11,6 +11,19 @@ export const ALLOWED_FILE_TYPES = {
 } as const
 
 export type AllowedMimeType = keyof typeof ALLOWED_FILE_TYPES
+
+export const MAX_FILE_SIZE_MB = 1; // 1MB limit
+
+export function getKeyFromUrl(url: string): string | null {
+    try {
+        const urlObj = new URL(url);
+        // Remove any leading slashes and the bucket name from the path if present
+        const path = urlObj.pathname.replace(/^\/+/, '');
+        return path;
+    } catch {
+        return null;
+    }
+}
 
 interface S3Config {
     region: string
@@ -87,7 +100,7 @@ class S3Service {
         // Check file size
         const fileSizeInMB = file.length / (1024 * 1024)
         if (fileSizeInMB > options.maxSizeMB) {
-            throw new Error(`File size exceeds ${options.maxSizeMB}MB limit`)
+            throw new Error(`File size exceeds ${options.maxSizeMB}MB limit. Please compress your image.`)
         }
 
         // Check mime type
@@ -119,7 +132,7 @@ class S3Service {
             },
         }
 
-        const finalOptions = {...defaultOptions, ...options}
+        const finalOptions = { ...defaultOptions, ...options }
 
         try {
             // Validate file

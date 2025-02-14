@@ -67,18 +67,59 @@ export function ImageCropper({ onComplete, onCancel }: ImageCropperProps) {
         setCroppedAreaPixels(croppedAreaPixels)
     }, [])
 
-    const getCroppedImage = async (imageSrc: string, pixelCrop: CropArea): Promise<string> => {
-        const image = new Image()
-        image.src = imageSrc
+    const compressImage = async (dataUrl: string, maxSizeMB: number): Promise<string> => {
+        const image = new Image();
+        image.src = dataUrl;
 
         return new Promise((resolve) => {
             image.onload = () => {
-                const canvas = document.createElement('canvas')
-                const ctx = canvas.getContext('2d')
-                if (!ctx) throw new Error('No 2d context')
+                let quality = 0.9;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d')!;
 
-                canvas.width = pixelCrop.width
-                canvas.height = pixelCrop.height
+                // Start with original dimensions
+                let width = image.width;
+                let height = image.height;
+
+                // Scale down if dimensions are too large
+                const MAX_DIMENSION = 1200;
+                if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+                    const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+                    width *= ratio;
+                    height *= ratio;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(image, 0, 0, width, height);
+
+                // Compress with reducing quality until size is under maxSizeMB
+                let compressedDataUrl;
+                do {
+                    compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    quality -= 0.1;
+                } while (
+                    quality > 0.1 &&
+                    (compressedDataUrl.length * 3 / 4) / (1024 * 1024) > maxSizeMB
+                );
+
+                resolve(compressedDataUrl);
+            };
+        });
+    };
+
+    const getCroppedImage = async (imageSrc: string, pixelCrop: CropArea): Promise<string> => {
+        const image = new Image();
+        image.src = imageSrc;
+
+        return new Promise((resolve) => {
+            image.onload = async () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (!ctx) throw new Error('No 2d context');
+
+                canvas.width = pixelCrop.width;
+                canvas.height = pixelCrop.height;
 
                 ctx.drawImage(
                     image,
@@ -90,11 +131,13 @@ export function ImageCropper({ onComplete, onCancel }: ImageCropperProps) {
                     0,
                     pixelCrop.width,
                     pixelCrop.height
-                )
+                );
 
-                resolve(canvas.toDataURL('image/jpeg', 0.85))
-            }
-        })
+                const croppedDataUrl = canvas.toDataURL('image/jpeg');
+                const compressedDataUrl = await compressImage(croppedDataUrl, 1); // 1MB limit
+                resolve(compressedDataUrl);
+            };
+        });
     }
 
     const handleSave = async () => {

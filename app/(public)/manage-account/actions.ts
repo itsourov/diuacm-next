@@ -5,7 +5,7 @@ import { profileSchema } from './validations'
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/lib/auth"
-import { s3Service } from "@/lib/s3"
+import { s3Service, getKeyFromUrl, MAX_FILE_SIZE_MB } from "@/lib/s3"
 
 export type FieldErrors = {
     name?: string;
@@ -48,6 +48,15 @@ export async function updateProfileImage(
             'base64'
         );
 
+        // Check file size
+        const fileSizeInMB = buffer.length / (1024 * 1024);
+        if (fileSizeInMB > MAX_FILE_SIZE_MB) {
+            return {
+                success: false,
+                error: `File size exceeds ${MAX_FILE_SIZE_MB}MB limit`
+            };
+        }
+
         const currentUser = await prisma.user.findUnique({
             where: { id: userId },
             select: { image: true }
@@ -56,25 +65,34 @@ export async function updateProfileImage(
         // Delete old image if exists
         if (currentUser?.image) {
             try {
-                // Extract key from the full URL
-                const urlParts = currentUser.image.split('/');
-                const key = urlParts[urlParts.length - 1];
+                const key = getKeyFromUrl(currentUser.image);
                 if (key) {
-                    await s3Service.deleteFile(key);
+                    // Check if file exists before attempting to delete
+                    const fileExists = await s3Service.fileExists(key);
+                    if (fileExists) {
+                        await s3Service.deleteFile(key);
+                        console.log('Successfully deleted old image:', key);
+                    } else {
+                        console.log('Old image not found:', key);
+                    }
                 }
             } catch (error) {
-                console.error('Failed to delete old image:', error);
+                // Log error but continue with upload
+                console.error('Error deleting old image:', error);
             }
         }
+
+        // Update the folder path to include user ID
+        const userProfileFolder = `profile-images/${userId}`;
 
         // Upload new image
         const { url } = await s3Service.uploadFile(
             buffer,
-            `${userId}-profile.jpg`,
+            `profile.jpg`, // Simplified filename since it's in a user-specific directory
             'image/jpeg',
             {
-                folder: 'profile-images',
-                maxSizeMB: 5,
+                folder: userProfileFolder,
+                maxSizeMB: MAX_FILE_SIZE_MB,
                 generateUniqueFilename: true,
                 allowedFileTypes: ['image/jpeg', 'image/png'],
                 metadata: {
