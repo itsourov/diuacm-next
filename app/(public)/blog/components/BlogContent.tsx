@@ -6,9 +6,10 @@ import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { coldarkDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Image from 'next/image';
-
+import { Check, Copy } from 'lucide-react';
+import { useState } from 'react';
 
 interface BlogContentProps {
   content: string;
@@ -20,28 +21,67 @@ interface CodeProps {
   children?: React.ReactNode;
 }
 
+// Add new interface for code block state
+interface CodeBlockProps extends CodeProps {
+  language?: string;
+}
+
 export default function BlogContent({ content }: BlogContentProps) {
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  const handleCopy = async (code: string) => {
+    await navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
   return (
     <div className="markdown-content prose dark:prose-invert max-w-none prose-pre:p-0">
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          code({ inline, className, children, ...props }: CodeProps) {
+          code({ inline, className, children, ...props }: CodeBlockProps) {
             const match = /language-(\w+)/.exec(className || '');
+            const language = match ? match[1] : '';
+            const code = String(children).replace(/\n$/, '');
+
             return !inline && match ? (
-              <SyntaxHighlighter
-                style={tomorrow}
-                language={match[1]}
-                PreTag="div"
-                customStyle={{
-                  margin: 0,
-                  borderRadius: '6px',
-                }}
-                {...props}
-              >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
+              <div className="relative group">
+                {/* Language label */}
+                <div className="absolute right-4 top-4 flex items-center gap-2">
+                  <span className="text-xs text-gray-400 bg-gray-800/50 px-2 py-1 rounded">
+                    {language}
+                  </span>
+                  <button
+                    onClick={() => handleCopy(code)}
+                    className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg 
+                             bg-gray-800/50 hover:bg-gray-700/50"
+                    title="Copy code"
+                  >
+                    {copiedCode === code ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+
+                <SyntaxHighlighter
+                  style={coldarkDark}
+                  language={language}
+
+                  PreTag="div"
+                  customStyle={{
+                    margin: 0,
+                    borderRadius: '6px',
+                    paddingTop: '2.5rem',
+                  }}
+                  {...props}
+                >
+                  {code}
+                </SyntaxHighlighter>
+              </div>
             ) : (
               <code className={className} {...props}>
                 {children}
