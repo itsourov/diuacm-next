@@ -75,9 +75,9 @@ export class DateTime {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
-                hour: '2-digit',
+                hour: 'numeric', // Changed from '2-digit' to 'numeric'
                 minute: '2-digit',
-                hour12: false,
+                hour12: true,    // Changed to true for 12-hour format
                 timeZone: opts.format === 'utc' ? 'UTC' : undefined,
                 timeZoneName: opts.includeTimezone ? 'shortOffset' : undefined,
             };
@@ -99,14 +99,6 @@ export class DateTime {
     static formatDateRange(startDate: Date, endDate: Date): string {
         const sameDay = startDate.toDateString() === endDate.toDateString();
 
-        const formatOptions: Intl.DateTimeFormatOptions = {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        };
-
         if (sameDay) {
             const date = new Intl.DateTimeFormat('en-US', {
                 month: 'short',
@@ -114,20 +106,28 @@ export class DateTime {
             }).format(startDate);
 
             const startTime = new Intl.DateTimeFormat('en-US', {
-                hour: '2-digit',
+                hour: 'numeric',    // Changed from '2-digit' to 'numeric'
                 minute: '2-digit',
-                hour12: false
+                hour12: true        // Changed to true for 12-hour format
             }).format(startDate);
 
             const endTime = new Intl.DateTimeFormat('en-US', {
-                hour: '2-digit',
+                hour: 'numeric',    // Changed from '2-digit' to 'numeric'
                 minute: '2-digit',
-                hour12: false,
+                hour12: true,       // Changed to true for 12-hour format
                 timeZoneName: 'shortOffset'
             }).format(endDate);
 
             return `${date}, ${startTime} - ${endTime}`;
         }
+
+        const formatOptions: Intl.DateTimeFormatOptions = {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',    // Changed from '2-digit' to 'numeric'
+            minute: '2-digit',
+            hour12: true        // Changed to true for 12-hour format
+        };
 
         return `${new Intl.DateTimeFormat('en-US', formatOptions).format(startDate)} - ${new Intl.DateTimeFormat('en-US', {
             ...formatOptions,
