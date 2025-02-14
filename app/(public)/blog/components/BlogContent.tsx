@@ -53,7 +53,7 @@ export default function BlogContent({ content }: BlogContentProps) {
             const code = String(children).replace(/\n$/, '');
 
             return !inline && match ? (
-              <div className="relative group my-8">
+              <div className="relative group">
                 <div className="absolute right-4 top-4 flex items-center gap-2 opacity-0 
                               group-hover:opacity-100 transition-opacity">
                   <span className="text-xs text-gray-400 bg-gray-800/70 px-2 py-1 rounded-md 
@@ -83,7 +83,7 @@ export default function BlogContent({ content }: BlogContentProps) {
                     margin: 0,
                     borderRadius: '0.75rem',
                     padding: '2rem 1.5rem',
-                    paddingTop: '3rem',
+
                     backgroundColor: 'rgb(17 24 39)',
                     boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
                   }}
