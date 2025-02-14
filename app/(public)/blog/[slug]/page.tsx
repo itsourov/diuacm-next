@@ -32,7 +32,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/50 to-gray-900/90" />
-        
+
         {/* Hero Content */}
         <div className="absolute inset-0 flex items-end">
           <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12 lg:pb-16">
@@ -68,21 +68,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                        backdrop-blur-lg border border-gray-100 dark:border-gray-700">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
             {/* Author Info */}
-            <div className="flex items-center gap-3 min-w-0">
-              <Image
-                src={post.author.image}
-                alt={post.author.name}
-                width={48}
-                height={48}
-                className="rounded-full ring-2 ring-white dark:ring-gray-700"
-              />
-              <div className="min-w-0">
-                <div className="font-medium text-gray-900 dark:text-white truncate">
-                  {post.author.name}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                  {post.author.bio}
-                </div>
+            <div className="min-w-0">
+              <div className="font-medium text-gray-900 dark:text-white">
+                {post.author.name}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {post.author.bio}
               </div>
             </div>
             {/* Divider */}

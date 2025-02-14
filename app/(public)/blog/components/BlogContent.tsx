@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Image from 'next/image';
 
 
@@ -31,7 +31,7 @@ export default function BlogContent({ content }: BlogContentProps) {
             const match = /language-(\w+)/.exec(className || '');
             return !inline && match ? (
               <SyntaxHighlighter
-                style={oneDark}
+                style={tomorrow}
                 language={match[1]}
                 PreTag="div"
                 customStyle={{
