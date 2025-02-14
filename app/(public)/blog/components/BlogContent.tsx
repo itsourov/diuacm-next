@@ -37,12 +37,12 @@ export default function BlogContent({ content }: BlogContentProps) {
 
   return (
     <div className="markdown-content prose dark:prose-invert max-w-none prose-pre:p-0 
-                    prose-headings:font-display prose-h1:text-4xl prose-h2:text-3xl 
-                    prose-h3:text-2xl prose-h4:text-xl prose-p:text-gray-700 
-                    dark:prose-p:text-gray-300 prose-a:text-blue-600 
-                    dark:prose-a:text-blue-400 hover:prose-a:text-blue-800 
-                    dark:hover:prose-a:text-blue-300 prose-img:rounded-lg 
-                    prose-img:shadow-md">
+                    prose-headings:font-display prose-h1:text-5xl prose-h2:text-4xl 
+                    prose-h3:text-3xl prose-h4:text-2xl prose-p:text-lg 
+                    prose-p:text-gray-700 dark:prose-p:text-gray-300 
+                    prose-a:text-blue-600 dark:prose-a:text-blue-400 
+                    hover:prose-a:text-blue-800 dark:hover:prose-a:text-blue-300 
+                    prose-img:rounded-lg prose-img:shadow-md prose-li:text-lg">
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
@@ -56,7 +56,7 @@ export default function BlogContent({ content }: BlogContentProps) {
               <div className="relative group">
                 <div className="absolute right-4 top-4 flex items-center gap-2 opacity-0 
                               group-hover:opacity-100 transition-opacity">
-                  <span className="text-xs text-gray-400 bg-gray-800/70 px-2 py-1 rounded-md 
+                  <span className="text-sm text-gray-400 bg-gray-800/70 px-2 py-1 rounded-md 
                                  font-mono backdrop-blur-sm">
                     {language}
                   </span>
@@ -83,9 +83,11 @@ export default function BlogContent({ content }: BlogContentProps) {
                     margin: 0,
                     borderRadius: '0.75rem',
                     padding: '2rem 1.5rem',
-
+                    paddingTop: '3rem',
                     backgroundColor: 'rgb(17 24 39)',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                    fontSize: '1.1rem',
+                    lineHeight: '1.75'
                   }}
                   {...props}
                 >
@@ -94,7 +96,7 @@ export default function BlogContent({ content }: BlogContentProps) {
               </div>
             ) : (
               <code className="px-1.5 py-0.5 rounded-md bg-gray-200 dark:bg-gray-800 
-                             font-mono text-sm" {...props}>
+                             font-mono text-base" {...props}>
                 {children}
               </code>
             );
@@ -134,18 +136,18 @@ export default function BlogContent({ content }: BlogContentProps) {
           },
           // Custom heading styles
           h1: (props) => (
-            <h1 className="text-4xl font-bold mt-12 mb-6 text-gray-900 
+            <h1 className="text-5xl font-bold mt-12 mb-6 text-gray-900 
                           dark:text-white tracking-tight" {...props} />
           ),
           h2: (props) => (
-            <h2 className="text-3xl font-bold mt-10 mb-5 text-gray-800 
+            <h2 className="text-4xl font-bold mt-10 mb-5 text-gray-800 
                           dark:text-gray-100 tracking-tight" {...props} />
           ),
           h3: (props) => (
-            <h3 className="text-2xl font-bold mt-8 mb-4 text-gray-800 
+            <h3 className="text-3xl font-bold mt-8 mb-4 text-gray-800 
                           dark:text-gray-100" {...props} />
           ),
-          h4: (props) => <h4 className="text-xl font-bold mt-6 mb-3" {...props} />,
+          h4: (props) => <h4 className="text-2xl font-bold mt-6 mb-3" {...props} />,
           // Custom paragraph and link styles
           a: (props) => (
             <a className="text-blue-600 dark:text-blue-400 hover:text-blue-800 
@@ -154,11 +156,11 @@ export default function BlogContent({ content }: BlogContentProps) {
           ),
           // Custom list styles
           ul: (props) => (
-            <ul className="list-disc list-inside my-6 space-y-2 text-gray-700 
+            <ul className="list-disc list-inside my-6 space-y-3 text-lg text-gray-700 
                           dark:text-gray-300" {...props} />
           ),
           ol: (props) => (
-            <ol className="list-decimal list-inside my-6 space-y-2 text-gray-700 
+            <ol className="list-decimal list-inside my-6 space-y-3 text-lg text-gray-700 
                           dark:text-gray-300" {...props} />
           ),
           // Custom blockquote style
@@ -176,12 +178,12 @@ export default function BlogContent({ content }: BlogContentProps) {
           thead: (props) => <thead className="bg-gray-50 dark:bg-gray-800" {...props} />,
           th: (props) => (
             <th
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+              className="px-6 py-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
               {...props}
             />
           ),
           td: (props) => (
-            <td className="px-6 py-4 whitespace-nowrap text-sm" {...props} />
+            <td className="px-6 py-4 whitespace-nowrap text-base" {...props} />
           ),
         }}
       >
