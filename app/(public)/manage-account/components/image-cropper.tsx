@@ -1,62 +1,108 @@
 "use client"
 
-import React, {useRef, useState} from "react"
-import AvatarEditor from "react-avatar-editor"
+import React, { useState, useCallback } from "react"
+import Cropper from 'react-easy-crop'
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
-import {Button} from "@/components/ui/button"
-import {Slider} from "@/components/ui/slider"
-import {cn} from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Slider } from "@/components/ui/slider"
+import { cn } from "@/lib/utils"
 
 interface ImageCropperProps {
-    onComplete: (croppedImage: string) => Promise<void>;
-    onCancel: () => void;
+    onComplete: (croppedImage: string) => Promise<void>
+    onCancel: () => void
 }
 
-export function ImageCropper({onComplete, onCancel}: ImageCropperProps) {
-    const [image, setImage] = useState<File | string | null>(null)
-    const [scale, setScale] = useState<number>(1)
-    // Fix: Use AvatarEditor type directly from the import
-    const editorRef = useRef<AvatarEditor>(null)
-    const [isDragging, setIsDragging] = useState<boolean>(false)
-    const [isProcessing, setIsProcessing] = useState<boolean>(false)
+interface CropArea {
+    x: number
+    y: number
+    width: number
+    height: number
+}
 
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>): void => {
+// Add this new interface
+interface Area {
+    x: number
+    y: number
+    width: number
+    height: number
+}
+
+export function ImageCropper({ onComplete, onCancel }: ImageCropperProps) {
+    const [image, setImage] = useState<string | null>(null)
+    const [crop, setCrop] = useState({ x: 0, y: 0 })
+    const [zoom, setZoom] = useState(1)
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropArea | null>(null)
+    const [isDragging, setIsDragging] = useState(false)
+    const [isProcessing, setIsProcessing] = useState(false)
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault()
         setIsDragging(false)
         const file = e.dataTransfer.files[0]
         if (file && file.type.startsWith("image/")) {
-            setImage(file)
+            const reader = new FileReader()
+            reader.onload = () => {
+                setImage(reader.result as string)
+            }
+            reader.readAsDataURL(file)
         }
     }
 
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>): void => {
-        e.preventDefault()
-        setIsDragging(true)
-    }
-
-    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>): void => {
-        e.preventDefault()
-        setIsDragging(false)
-    }
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setImage(e.target.files[0])
+            const reader = new FileReader()
+            reader.onload = () => {
+                setImage(reader.result as string)
+            }
+            reader.readAsDataURL(e.target.files[0])
         }
     }
 
-    const handleSave = async (): Promise<void> => {
-        if (editorRef.current && !isProcessing) {
+    const onCropComplete = useCallback((croppedArea: Area, croppedAreaPixels: CropArea) => {
+        setCroppedAreaPixels(croppedAreaPixels)
+    }, [])
+
+    const getCroppedImage = async (imageSrc: string, pixelCrop: CropArea): Promise<string> => {
+        const image = new Image()
+        image.src = imageSrc
+
+        return new Promise((resolve) => {
+            image.onload = () => {
+                const canvas = document.createElement('canvas')
+                const ctx = canvas.getContext('2d')
+                if (!ctx) throw new Error('No 2d context')
+
+                canvas.width = pixelCrop.width
+                canvas.height = pixelCrop.height
+
+                ctx.drawImage(
+                    image,
+                    pixelCrop.x,
+                    pixelCrop.y,
+                    pixelCrop.width,
+                    pixelCrop.height,
+                    0,
+                    0,
+                    pixelCrop.width,
+                    pixelCrop.height
+                )
+
+                resolve(canvas.toDataURL('image/jpeg', 0.85))
+            }
+        })
+    }
+
+    const handleSave = async () => {
+        if (image && croppedAreaPixels && !isProcessing) {
             try {
                 setIsProcessing(true)
-                const canvas = editorRef.current.getImage()
-                const dataUrl = canvas.toDataURL("image/jpeg", 0.85)
-                await onComplete(dataUrl)
+                const croppedImage = await getCroppedImage(image, croppedAreaPixels)
+                await onComplete(croppedImage)
             } catch (error) {
                 console.error('Error saving image:', error)
             } finally {
@@ -76,8 +122,8 @@ export function ImageCropper({onComplete, onCancel}: ImageCropperProps) {
                     {!image ? (
                         <div
                             onDrop={handleDrop}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
+                            onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+                            onDragLeave={(e) => { e.preventDefault(); setIsDragging(false) }}
                             className={cn(
                                 "flex flex-col items-center justify-center gap-4 p-8",
                                 "border-2 border-dashed rounded-lg transition-colors",
@@ -87,58 +133,48 @@ export function ImageCropper({onComplete, onCancel}: ImageCropperProps) {
                                     : "border-gray-200 dark:border-gray-700",
                                 "cursor-pointer"
                             )}
-                            role="button"
-                            tabIndex={0}
-                            aria-label="Drag and drop area for image upload"
                         >
                             <p className="text-sm text-muted-foreground text-center">
                                 Drag and drop your image here, or click to select
                             </p>
                             <Button asChild variant="secondary">
-                                <label className="cursor-pointer">
+                                <label>
                                     Choose Image
                                     <input
                                         type="file"
                                         accept="image/*"
                                         className="hidden"
                                         onChange={handleFileChange}
-                                        aria-label="Choose image file"
                                     />
                                 </label>
                             </Button>
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            <div className="flex justify-center">
-                                <AvatarEditor
-                                    ref={editorRef}
+                            <div className="relative h-[300px]">
+                                <Cropper
                                     image={image}
-                                    width={250}
-                                    height={250}
-                                    border={25}
-                                    borderRadius={125}
-                                    color={[0, 0, 0, 0.6]} // RGBA
-                                    scale={scale}
-                                    rotate={0}
-                                    className="rounded-lg"
+                                    crop={crop}
+                                    zoom={zoom}
+                                    aspect={1}
+                                    onCropChange={setCrop}
+                                    onZoomChange={setZoom}
+                                    onCropComplete={onCropComplete}
+                                    cropShape="round"
+                                    showGrid={false}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label
-                                    className="text-sm font-medium"
-                                    htmlFor="scale-slider"
-                                >
+                                <label className="text-sm font-medium">
                                     Zoom
                                 </label>
                                 <Slider
-                                    id="scale-slider"
-                                    value={[scale]}
+                                    value={[zoom]}
                                     min={1}
-                                    max={2}
+                                    max={3}
                                     step={0.1}
-                                    onValueChange={(value) => setScale(value[0])}
-                                    aria-label="Image zoom level"
+                                    onValueChange={(value) => setZoom(value[0])}
                                 />
                             </div>
 
@@ -147,10 +183,9 @@ export function ImageCropper({onComplete, onCancel}: ImageCropperProps) {
                                     variant="outline"
                                     onClick={() => {
                                         setImage(null)
-                                        setScale(1)
+                                        setZoom(1)
                                     }}
                                     disabled={isProcessing}
-                                    type="button"
                                 >
                                     Change Image
                                 </Button>
@@ -158,14 +193,12 @@ export function ImageCropper({onComplete, onCancel}: ImageCropperProps) {
                                     variant="outline"
                                     onClick={onCancel}
                                     disabled={isProcessing}
-                                    type="button"
                                 >
                                     Cancel
                                 </Button>
                                 <Button
                                     onClick={handleSave}
                                     disabled={isProcessing}
-                                    type="button"
                                 >
                                     {isProcessing ? 'Saving...' : 'Save'}
                                 </Button>
