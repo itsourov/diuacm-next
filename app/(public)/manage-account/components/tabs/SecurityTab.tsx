@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Lock, Eye, EyeOff, KeyRound, Shield } from 'lucide-react'
+import { Lock, Eye, EyeOff, Shield } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { FormField } from '../common/FormField'
