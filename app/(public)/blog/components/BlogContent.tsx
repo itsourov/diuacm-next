@@ -49,30 +49,34 @@ export default function BlogContent({ content }: BlogContentProps) {
             );
           },
           img({ src, alt }) {
-            // Render images without wrapping p tag
+            // Return just the Image component without a wrapper
             return (
-              <span className="block relative aspect-video my-8">
-                <Image
-                  src={src || ''}
-                  alt={alt || ''}
-                  fill
-                  className="object-contain"
-                />
-              </span>
+              <Image
+                src={src || ''}
+                alt={alt || ''}
+                width={1920}
+                height={1080}
+                className="w-full h-auto my-8"
+                style={{ maxHeight: '80vh' }}
+              />
             );
           },
-          p({ children }) {
-            // Check if children contains an image
-            const hasImage = (Array.isArray(children)
-              ? children.some(child => typeof child === 'object' && 'type' in child && child.type === 'img')
-              : false);
+          // Modify p component to handle images differently
+          p({ children, ...props }) {
+            // Check if children is an image
+            const hasOnlyImage = (Array.isArray(children)
+              && children.length === 1
+              && typeof children[0] === 'object'
+              && 'type' in children[0]
+              && children[0].type === 'img');
 
-            // If it contains an image, render without p tag
-            if (hasImage) {
+            // If it's just an image, return the children directly without p wrapper
+            if (hasOnlyImage) {
               return <>{children}</>;
             }
 
-            return <p className="my-4 leading-relaxed">{children}</p>;
+            // Otherwise return normal paragraph
+            return <p className="my-4 leading-relaxed" {...props}>{children}</p>;
           },
           // Custom heading styles
           h1: (props) => <h1 className="text-4xl font-bold mt-8 mb-4" {...props} />,
