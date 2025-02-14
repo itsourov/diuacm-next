@@ -11,6 +11,7 @@ interface User {
   id: string;
   name: string;
   username: string;
+  studentId: string | null;
   image: string | null;
 }
 

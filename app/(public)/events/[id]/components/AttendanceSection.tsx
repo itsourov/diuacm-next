@@ -18,6 +18,7 @@ type EventWithUsers = Event & {
             id: string;
             name: string;
             username: string;
+            studentId: string | null;
             image: string | null;
         };
     }>;
@@ -209,7 +210,7 @@ export default function AttendanceSection({
                                             {user.name}
                                         </p>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                                            @{user.username}
+                                            {user.studentId || "No student ID"}
                                         </p>
                                     </div>
                                 </div>

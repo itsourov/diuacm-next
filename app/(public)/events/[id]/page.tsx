@@ -19,6 +19,7 @@ interface User {
   id: string;
   name: string;
   username: string;
+  studentId: string | null;
   image: string | null;
 }
 
@@ -52,6 +53,7 @@ async function getEvent(id: string): Promise<EventWithRelations> {
               name: true,
               username: true,
               image: true,
+              studentId: true,
             },
           },
         },
@@ -63,6 +65,7 @@ async function getEvent(id: string): Promise<EventWithRelations> {
               id: true,
               name: true,
               username: true,
+              studentId: true,
               image: true,
             },
           },
