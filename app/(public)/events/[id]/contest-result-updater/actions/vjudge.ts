@@ -199,6 +199,16 @@ export async function updateVjudgeResults({
             };
         }
 
+        // Check if response is valid JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            if (sessionId)
+                return { success: false, error: "Invalid response format from vjudge. check if the vjudge account have access to this contest" };
+            else
+                return { success: false, error: "Invalid response format from vjudge. maybe this contest is only accessable with authentication." };
+        }
+
+
         const data = await response.json();
 
         // Accept data if it has the required minimal structure
@@ -252,6 +262,6 @@ export async function updateVjudgeResults({
         return { success: true, data: processedData };
     } catch (error) {
         log(`Error: ${error instanceof Error ? error.message : String(error)}`);
-        return { success: false, error: "Failed to update results" };
+        return { success: false, error: "Failed to update results. " };
     }
 }

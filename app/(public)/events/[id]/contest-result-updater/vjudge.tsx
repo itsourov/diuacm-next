@@ -165,7 +165,7 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
                     setShowSessionInput(true);
                 } else {
                     toast.error("Update Failed", {
-                        description: result.error || "Failed to update results.",
+                        description: result.error || "Failed to update results1.",
                     });
                 }
             }
