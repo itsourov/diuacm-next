@@ -19,14 +19,12 @@ interface SecurityTabProps {
 
 export default function SecurityTab({ user }: SecurityTabProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const [showCurrentPassword, setShowCurrentPassword] = useState(false)
     const [showNewPassword, setShowNewPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
     const form = useForm<PasswordFormData>({
         resolver: zodResolver(passwordSchema),
         defaultValues: {
-            currentPassword: '',
             newPassword: '',
             confirmPassword: ''
         }
@@ -71,42 +69,6 @@ export default function SecurityTab({ user }: SecurityTabProps) {
             </div>
 
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {user.password && (
-                    <FormField
-                        label="Current Password"
-                        icon={KeyRound}
-                        error={errors.currentPassword?.message}
-                        required
-                    >
-                        <div className="relative">
-                            <Input
-                                {...register('currentPassword')}
-                                type={showCurrentPassword ? 'text' : 'password'}
-                                className={cn(
-                                    "pl-9 pr-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
-                                    "focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-                                    errors.currentPassword && "border-red-500 dark:border-red-500 focus:ring-red-500"
-                                )}
-                                placeholder="Enter your current password"
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                aria-label={showCurrentPassword ? "Hide password" : "Show password"}
-                            >
-                                {showCurrentPassword ? (
-                                    <EyeOff className="h-4 w-4 text-gray-500" />
-                                ) : (
-                                    <Eye className="h-4 w-4 text-gray-500" />
-                                )}
-                            </Button>
-                        </div>
-                    </FormField>
-                )}
-
                 <FormField
                     label="New Password"
                     icon={Lock}

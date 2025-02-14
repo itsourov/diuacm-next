@@ -3,9 +3,9 @@
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { passwordSchema } from "../validations/password-schema"
-import { hash, compare } from "bcryptjs"
+import { hash } from "bcryptjs"
 import { z } from "zod"
-import {revalidatePath} from "next/cache";
+import { revalidatePath } from "next/cache"
 
 export type PasswordUpdateResponse = {
     success: boolean
@@ -24,41 +24,6 @@ export async function updatePassword(
             }
         }
 
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: { password: true }
-        })
-
-        if (!user) {
-            return {
-                success: false,
-                error: "User not found"
-            }
-        }
-
-        // If user has a password, verify current password
-        if (user.password) {
-            if (!data.currentPassword) {
-                return {
-                    success: false,
-                    error: "Current password is required"
-                }
-            }
-
-            const isValidPassword = await compare(
-                data.currentPassword,
-                user.password
-            )
-
-            if (!isValidPassword) {
-                return {
-                    success: false,
-                    error: "Current password is incorrect"
-                }
-            }
-        }
-
-        // Hash new password and update
         const hashedPassword = await hash(data.newPassword, 12)
 
         await prisma.user.update({
