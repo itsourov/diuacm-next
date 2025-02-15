@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
     Select,
     SelectContent,
@@ -11,7 +10,6 @@ import {
 import { useRouter } from "next/navigation";
 import { RankList } from "@prisma/client";
 import { TrackerWithRelations } from "../types";
-import { RefreshCw } from "lucide-react";
 
 interface TrackerHeroSectionProps {
     tracker: TrackerWithRelations;
@@ -89,14 +87,7 @@ export default function TrackerHeroSection({
                             </SelectContent>
                         </Select>
 
-                        <Button
-                            variant="outline"
-                            onClick={() => router.refresh()}
-                            className="w-full sm:w-auto bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-                        >
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                            Refresh
-                        </Button>
+
                     </div>
                 </div>
             </div>
