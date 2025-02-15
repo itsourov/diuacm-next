@@ -33,6 +33,7 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd /home/sourov/nextjs/diuacm
+          whoami
           git pull origin main
           npm install
           npm run build
