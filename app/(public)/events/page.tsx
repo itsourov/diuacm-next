@@ -1,10 +1,10 @@
 // app/(public)/events/page.tsx
-import {Suspense} from 'react';
-import {getEvents} from './actions';
+import { Suspense } from 'react';
+import { getEvents } from './actions';
 import EventSearchForm from './components/EventSearchForm';
 import EventCard from './components/EventCard';
 import Pagination from './components/Pagination';
-import {EventsSearchParams} from "@/app/(public)/events/types";
+import { EventsSearchParams } from "@/app/(public)/events/types";
 import EmptyState from "@/app/(public)/events/components/EmptyState";
 
 type PageProps = {
@@ -17,11 +17,14 @@ type PageProps = {
     }>
 }
 
-export default async function EventsPage({searchParams}: PageProps) {
+export const dynamic = 'force-dynamic';
+export const revalidate = 60; // revalidate every 60 seconds
+
+export default async function EventsPage({ searchParams }: PageProps) {
     // Await the searchParams before using them
     const resolvedParams = await searchParams;
 
-    const {events, totalPages, currentPage} = await getEvents({
+    const { events, totalPages, currentPage } = await getEvents({
         page: resolvedParams.page ? parseInt(resolvedParams.page) : 1,
         query: resolvedParams.query,
         type: resolvedParams.type as EventsSearchParams['type'],
@@ -47,12 +50,12 @@ export default async function EventsPage({searchParams}: PageProps) {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <Suspense fallback={<div>Loading search...</div>}>
-                    <EventSearchForm/>
+                    <EventSearchForm />
                 </Suspense>
 
                 <div className="mt-8 space-y-4">
                     {events.map((event) => (
-                        <EventCard key={event.id} event={event}/>
+                        <EventCard key={event.id} event={event} />
                     ))}
 
                     {events.length === 0 && (
