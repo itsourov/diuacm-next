@@ -34,7 +34,7 @@ export async function toggleRankListSubscription(rankListId: string) {
       });
     }
 
-    revalidatePath("/trackers/[tracker_slug]/[ranklist_id]");
+    revalidatePath("/trackers/[tracker_slug]/[ranklist_id]", 'page');
     return { success: true };
   } catch (error) {
     console.error("Error toggling subscription:", error);
@@ -191,7 +191,7 @@ export async function recalculateRankListScores(rankListId: string) {
       });
     }
 
-    revalidatePath("/trackers/[tracker_slug]/[ranklist_id]");
+    revalidatePath("/trackers/[tracker_slug]/[ranklist_id]", 'page');
     return { success: true, message: "Scores recalculated successfully" };
   } catch (error) {
     console.error("Error recalculating scores:", error);
