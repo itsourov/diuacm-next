@@ -79,7 +79,7 @@ export default function PointHistoryModal({
                         {stats && (
                             <div className="grid grid-cols-3 gap-4">
                                 {[
-                                    { label: "Events", value: stats.totalStats.totalEvents },
+                                    { label: "Contests", value: stats.totalStats.totalEvents },
                                     { label: "Solves", value: stats.totalStats.totalSolves },
                                     { label: "Upsolves", value: stats.totalStats.totalUpsolves },
                                 ].map((stat, i) => (
