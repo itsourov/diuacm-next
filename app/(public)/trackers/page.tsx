@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma";
 import TrackerCard from './components/TrackerCard';
 import EmptyState from './components/EmptyState';
+import { getTrackers } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,21 +11,7 @@ export const metadata = {
 
 export default async function TrackersPage() {
   try {
-    const trackers = await prisma.tracker.findMany({
-      where: {
-        status: 'published'
-      },
-      include: {
-        rankLists: {
-          orderBy: {
-            createdAt: 'desc'
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    const trackers = await getTrackers();
 
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
