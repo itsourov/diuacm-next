@@ -1,37 +1,157 @@
 {
   "semesters": [
     {
-      "name": "Fall 2023",
-      "period": "September 2023 - December 2023",
+      "name": "Spring 2025",
+      "period": "January 2025 - April 2025",
       "contests": [
         {
-          "title": "UIU IUPC 2025",
-          "date": "2023-11-15",
-          "ranklistLink": "https://icpc.global/...",
+          "title": "UIU INTER-UNIVERSITY PROGRAMMING CONTEST 2025",
+          "date": "Jan 18 2025",
+          "ranklistLink": "https://bapsoj.org/contests/uiu-inter-university-programming-contest-2025",
           "venue": "UIU University",
           "teams": [
             {
-              "name": "DIU_Voyagers",
-              "rank": 15,
+              "name": "DIU_Strygwyr",
+              "rank": 24,
               "members": [
                 {
-                  "name": "John Doe",
+                  "name": "Member 1",
                   "studentId": "221-35-1234"
                 },
                 {
-                  "name": "Jane Smith",
+                  "name": "Member 2",
                   "studentId": "221-35-1235"
                 },
                 {
-                  "name": "Alex Johnson",
+                  "name": "Member 3",
                   "studentId": "221-35-1236"
+                }
+              ]
+            },
+            {
+              "name": "DIU_1000th_WA",
+              "rank": 39,
+              "members": [
+                {
+                  "name": "MD. Masum Billah",
+                  "studentId": "221-35-1234"
+                },
+                {
+                  "name": "Kh Sadman Sakib",
+                  "studentId": "221-35-1235"
+                },
+                {
+                  "name": "Sourov Biswas",
+                  "studentId": "232-15-004"
+                }
+              ]
+            },
+            {
+              "name": "DIU_Curious_Trio",
+              "rank": 55,
+              "members": [
+                {
+                  "name": "Piyash Basak",
+                  "studentId": "221-35-1234"
+                },
+                {
+                  "name": "Md. Mohimenul Islam ",
+                  "studentId": "221-35-1235"
+                },
+                {
+                  "name": "Md. Saimum Islam Hamza",
+                  "studentId": "221-35-1235"
+                }
+              ]
+            },
+            {
+              "name": "DIU_Fakibazz",
+              "rank": 58,
+              "members": [
+                {
+                  "name": "Md. Uodoy Hossan Rafi",
+                  "studentId": "221-35-1234"
+                },
+                {
+                  "name": "Arfan Uddin",
+                  "studentId": "221-35-1235"
+                },
+                {
+                  "name": "Robin",
+                  "studentId": "221-35-1235"
                 }
               ]
             }
           ],
           "images": [
-            "/images/contests/spring25/uiu-iupc/kuet-iupc-2025-2.png",
             "/images/contests/spring25/uiu-iupc/uiu-iupc-2025-1.png"
+          ]
+        },
+        {
+          "title": "KUET IUPC Onsite 2025",
+          "date": "Jan 4 2025",
+          "ranklistLink": "https://bapsoj.org/contests/miaki-presents-kuet-iupc-onsite-2025/standings",
+          "venue": "KUET",
+          "teams": [
+            {
+              "name": "DIU_Strygwyr",
+              "rank": 14,
+              "members": [
+                {
+                  "name": "Member 1",
+                  "studentId": "221-35-1234"
+                },
+                {
+                  "name": "Member 2",
+                  "studentId": "221-35-1235"
+                },
+                {
+                  "name": "Member 3",
+                  "studentId": "221-35-1236"
+                }
+              ]
+            },
+            {
+              "name": "DIU_Curious_Trio",
+              "rank": 38,
+              "members": [
+                {
+                  "name": "Piyash Basak",
+                  "studentId": "221-35-1234"
+                },
+                {
+                  "name": "Md. Mohimenul Islam ",
+                  "studentId": "221-35-1235"
+                },
+                {
+                  "name": "Md. Saimum Islam Hamza",
+                  "studentId": "221-35-1235"
+                }
+              ]
+            },
+            {
+              "name": "DIU_1000th_WA",
+              "rank": 44,
+              "members": [
+                {
+                  "name": "MD. Masum Billah",
+                  "studentId": "221-35-1234"
+                },
+                {
+                  "name": "Kh Sadman Sakib",
+                  "studentId": "221-35-1235"
+                },
+                {
+                  "name": "Sourov Biswas",
+                  "studentId": "232-15-004"
+                }
+              ]
+            }
+          ],
+          "images": [
+            "/images/contests/spring25/kuet-iupc/kuet-iupc-2025-1.png",
+            "/images/contests/spring25/kuet-iupc/kuet-iupc-2025-2.png",
+            "/images/contests/spring25/kuet-iupc/kuet-iupc-2025-3.png"
           ]
         }
       ]
