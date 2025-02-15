@@ -46,7 +46,7 @@ export default function TrackerTabs({
               "transition-all duration-200"
             )}
           >
-            Connected Events
+            Rated Contests
           </TabsTrigger>
         </TabsList>
       </div>

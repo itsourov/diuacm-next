@@ -26,7 +26,7 @@ export default function EventListSection({ events }: EventListSectionProps) {
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-        Connected Events ({events.length})
+        Rated Contests ({events.length})
       </h2>
 
       <div className="grid gap-6">
