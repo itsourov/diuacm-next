@@ -4,8 +4,12 @@ import { isAfter, isWithinInterval } from 'date-fns';
 import Link from 'next/link';
 import { DateTime } from '@/lib/utils/datetime';
 
+type EventWithNumberId = Omit<Event, 'id'> & {
+    id: number;
+};
+
 type EventCardProps = {
-    event: Event;
+    event: EventWithNumberId;
 }
 
 const getScopeConfig = (scope: AttendanceScope) => {

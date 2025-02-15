@@ -51,8 +51,14 @@ export const getEvents = unstable_cache(
             prisma.event.count({ where })
         ]);
 
+        // Convert BigInt to number in the events array
+        const serializedEvents = events.map(event => ({
+            ...event,
+            id: Number(event.id)
+        }));
+
         return {
-            events,
+            events: serializedEvents,
             totalPages: Math.ceil(totalCount / perPage),
             currentPage: page
         };
