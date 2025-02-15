@@ -42,11 +42,11 @@ export default function TrackerHeroSection({
                 <div className="space-y-6">
                     {/* Tracker Badge */}
                     <div className="inline-flex items-center px-4 py-2.5 rounded-2xl
-            bg-gradient-to-r from-blue-500/10 to-purple-500/10
-            dark:from-blue-500/20 dark:to-purple-500/20
-            backdrop-blur-xl shadow-lg shadow-blue-500/10 dark:shadow-blue-500/20
-            border border-blue-100/20 dark:border-blue-500/20
-            text-blue-600 dark:text-blue-400 font-medium">
+                        bg-gradient-to-r from-blue-500/20 to-purple-500/20
+                        dark:from-blue-500/30 dark:to-purple-500/30
+                        shadow-lg shadow-blue-500/10 dark:shadow-blue-500/20
+                        border border-blue-100/20 dark:border-blue-500/20
+                        text-blue-600 dark:text-blue-400 font-medium">
                         <div className="flex items-center gap-2 text-sm">
                             <span className="inline-block w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                             Tracker

@@ -13,7 +13,7 @@ export default function SemesterSection({ semester }: SemesterSectionProps) {
   return (
     <section className="relative">
       {/* Semester Header */}
-      <div className="sticky top-0 z-10 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-xl py-6">
+      <div className="sticky top-0 z-10 bg-gray-50/95 dark:bg-gray-900/95 py-6">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-2xl bg-purple-500/10 dark:bg-purple-400/10">
             <Calendar className="w-6 h-6 text-purple-600 dark:text-purple-400" />
