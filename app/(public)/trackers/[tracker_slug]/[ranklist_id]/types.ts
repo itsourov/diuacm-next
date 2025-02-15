@@ -37,3 +37,23 @@ export interface SolveStatWithEvent extends SolveStat {
   event: Event;
 }
 
+export interface SolveStatWithPoints extends SolveStat {
+  event: Event;
+  eventWeight: number;
+  points: {
+    contestPoints: number;
+    upsolvePoints: number;
+    totalPoints: number;
+  };
+}
+
+export interface UserStatsWithPoints {
+  solveStats: SolveStatWithPoints[];
+  totalStats: {
+    totalEvents: number;
+    totalSolves: number;
+    totalUpsolves: number;
+    totalPoints: number;
+  };
+}
+

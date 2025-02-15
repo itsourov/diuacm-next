@@ -123,9 +123,48 @@ export async function getUserSolveStats(userId: string, rankListId: string) {
       include: {
         event: true,
       },
+      orderBy: {
+        event: {
+          startingAt: 'desc'
+        }
+      },
     });
 
-    return { success: true, solveStats };
+    const solveStatsWithPoints = solveStats.map((stat) => {
+      const eventRankList = rankList.eventRankLists.find(
+        (erl) => erl.eventId === stat.eventId
+      );
+      const weight = eventRankList?.weight || 0;
+      const contestPoints = Number(stat.solveCount) * weight;
+      const upsolvePoints =
+        Number(stat.upsolveCount) * weight * rankList.weightOfUpsolve;
+
+      return {
+        ...stat,
+        eventWeight: weight,
+        points: {
+          contestPoints,
+          upsolvePoints,
+          totalPoints: contestPoints + upsolvePoints,
+        },
+      };
+    });
+
+    const totalStats = solveStatsWithPoints.reduce(
+      (acc, stat) => ({
+        totalEvents: acc.totalEvents + 1,
+        totalSolves: acc.totalSolves + Number(stat.solveCount),
+        totalUpsolves: acc.totalUpsolves + Number(stat.upsolveCount),
+        totalPoints: acc.totalPoints + stat.points.totalPoints,
+      }),
+      { totalEvents: 0, totalSolves: 0, totalUpsolves: 0, totalPoints: 0 }
+    );
+
+    return {
+      success: true,
+      solveStats: solveStatsWithPoints,
+      totalStats,
+    };
   } catch (error) {
     console.error("Error loading solve stats:", error);
     return { success: false, message: "Failed to load solve stats" };
