@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { getEvents } from './actions';
 import EventSearchForm from './components/EventSearchForm';
 import EventCard from './components/EventCard';
-import Pagination from './components/Pagination';
+import Pagination from "@/components/shared/Pagination";
 import { EventsSearchParams } from "@/app/(public)/events/types";
 import EmptyState from "@/app/(public)/events/components/EmptyState";
 
