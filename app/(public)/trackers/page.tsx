@@ -5,8 +5,9 @@ import { getTrackers } from './actions';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Trackers | Programming Hub',
-  description: 'View all programming trackers and rankings',
+  title: 'Programming Trackers | DIU ACM Community',
+  description: 'Track your competitive programming progress, view rankings, and compare performance with fellow programmers in the DIU ACM community.',
+  keywords: ['programming tracker', 'competitive programming', 'performance tracking', 'programming rankings', 'DIU ACM']
 };
 
 export default async function TrackersPage() {

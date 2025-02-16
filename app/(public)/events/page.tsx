@@ -7,6 +7,12 @@ import Pagination from "@/components/shared/Pagination";
 import { EventsSearchParams } from "@/app/(public)/events/types";
 import EmptyState from "@/app/(public)/events/components/EmptyState";
 
+export const metadata = {
+  title: 'Programming Events & Contests | DIU ACM Community',
+  description: 'Stay updated with upcoming programming contests, workshops, and training sessions at DIU ACM. Join our events to enhance your competitive programming skills.',
+  keywords: ['programming contests', 'coding events', 'programming workshops', 'DIU ACM events', 'competitive programming']
+};
+
 type PageProps = {
     searchParams: Promise<{
         page?: string;

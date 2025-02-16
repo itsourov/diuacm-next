@@ -2,8 +2,9 @@ import { getBlogMeta } from "./utils/mdx";
 import BlogCard from "./components/BlogCard";
 
 export const metadata = {
-  title: "Blog | DIUACM",
-  description: "Latest articles and updates from DIU ACM Community",
+  title: 'Programming Blog & Tutorials | DIU ACM Community',
+  description: 'Read insightful articles, tutorials, and community updates about competitive programming, algorithms, and problem-solving techniques from DIU ACM members.',
+  keywords: ['programming blog', 'competitive programming tutorials', 'algorithm tutorials', 'coding tips', 'DIU ACM blog']
 };
 
 export default function BlogPage() {

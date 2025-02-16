@@ -10,6 +10,12 @@ import {
 } from 'lucide-react';
 import HeroSection from "@/app/(public)/(homepage)/HeroSection";
 
+export const metadata = {
+  title: 'DIU ACM Community | Competitive Programming Excellence',
+  description: 'Join DIU ACM to excel in competitive programming through structured learning paths, regular contests, and expert mentorship. Home of ICPC aspirants at Daffodil International University.',
+  keywords: ['competitive programming', 'DIU ACM', 'programming contests', 'ICPC', 'algorithm training', 'coding competition', 'Daffodil International University']
+};
+
 const rules = {
     contests: [
         "No external website usage during contests except the platform",
