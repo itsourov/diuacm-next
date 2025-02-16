@@ -91,7 +91,8 @@ function processUserResults(
         const result = standings.result!;
 
         const contestRow = result.rows.find(
-            row => row.party.participantType === "CONTESTANT" &&
+            row => (row.party.participantType === "CONTESTANT" || 
+                   row.party.participantType === "OUT_OF_COMPETITION") &&
                 row.party.members.some(m => m.handle.toLowerCase() === handle.toLowerCase())
         );
 
