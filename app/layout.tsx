@@ -6,6 +6,8 @@ import { Toaster as Toaster2 } from 'sonner';
 import { SessionProvider } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from 'next-themes';
+import { GoogleAnalytics } from '@next/third-parties/google'
+
 
 
 const inter = Inter({ subsets: ['latin'] });
@@ -42,6 +44,8 @@ export default function RootLayout({
                     </SessionProvider>
                 </ThemeProvider>
             </body>
+            <GoogleAnalytics gaId="G-CSW7LT4FFP" />
+
         </html>
     );
 }

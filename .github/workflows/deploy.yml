@@ -36,4 +36,4 @@ jobs:
           git pull origin main
           npm install
           npm run build
-          pm2 reload diuacm
+          pm2 restart diuacm
