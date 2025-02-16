@@ -41,6 +41,7 @@ const navLinks: NavLink[] = [
     { name: 'Trackers', href: '/trackers', icon: Calendar },
     { name: 'Blog', href: '/blog', icon: BookOpen },
     { name: 'Contest Success', href: '/contest-success', icon: Gallery },
+    { name: 'Users', href: '/users', icon: UserIcon },
 ];
 
 
