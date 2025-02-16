@@ -463,14 +463,17 @@ export default function Homepage() {
                                 </div>
 
                                 <div className="flex flex-wrap gap-4 pt-4">
-                                    <Link href='https://t.me/+X94KLytY-Kk5NzU9'
+                                    <a
+                                        href="https://t.me/+X94KLytY-Kk5NzU9"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="px-6 py-3 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center gap-2">
                                         <MessageSquare className="w-4 h-4" /> Join Telegram
-                                    </Link>
-                                    <button
+                                    </a>
+                                    {/* <button
                                         className="px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
                                         <Terminal className="w-4 h-4" /> Visit Lab
-                                    </button>
+                                    </button> */}
                                 </div>
                             </div>
                         </div>
