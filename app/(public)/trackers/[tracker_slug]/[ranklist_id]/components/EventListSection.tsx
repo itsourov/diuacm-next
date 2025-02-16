@@ -21,7 +21,12 @@ export default function EventListSection({ events }: EventListSectionProps) {
     setDisplayedCount((prev) => prev + PAGE_SIZE);
   };
 
-  const displayedEvents = events.slice(0, displayedCount);
+  // Sort events by starting date in descending order (latest first)
+  const sortedEvents = [...events].sort((a, b) => {
+    return new Date(b.event.startingAt).getTime() - new Date(a.event.startingAt).getTime();
+  });
+
+  const displayedEvents = sortedEvents.slice(0, displayedCount);
 
   return (
     <div className="space-y-8">
