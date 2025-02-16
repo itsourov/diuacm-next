@@ -10,6 +10,7 @@ import { DateTime } from "@/lib/utils/datetime";
 import { Event, SolveStat } from "@prisma/client";
 import { VjudgeResultsDialog } from "./contest-result-updater/vjudge";
 import { CodeforcesResultsDialog } from "./contest-result-updater/codeforces";
+import { AtcoderResultsDialog } from "./contest-result-updater/atcoder";
 
 interface EventPageProps {
   params: Promise<{ id: string }>;  // Changed to Promise
@@ -184,6 +185,14 @@ export default async function EventPage({ params }: EventPageProps) {
                 currentUser={session?.user?.name ?? 'guest'}
               />
             )}
+
+            {event.type === 'contest' && event.eventLink?.includes('atcoder.jp') && (
+              <AtcoderResultsDialog
+                eventId={event.id}
+                contestId={getAtcoderContestId(event.eventLink)}
+                currentUser={session?.user?.name ?? 'guest'}
+              />
+            )}
           </div>
 
           {/* Countdown Section - Only show if event hasn't ended */}
@@ -218,5 +227,10 @@ function getVjudgeContestId(url: string): string {
 
 function getCodeforcesContestId(url: string): string {
   const match = url.match(/contests\/(\d+)/);
+  return match ? match[1] : "";
+}
+
+function getAtcoderContestId(url: string): string {
+  const match = url.match(/contests\/([^/]+)/);
   return match ? match[1] : "";
 }
