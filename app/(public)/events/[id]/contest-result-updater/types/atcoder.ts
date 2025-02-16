@@ -28,8 +28,8 @@ export interface AtcoderUpdateProgress {
     type: 'progress';
     userResults: ProcessedUserResult[];
     currentUser?: string;
-    totalUsers?: number;
-    processedUsers?: number;
+    totalUsers: number;
+    processedUsers: number;
 }
 
 export interface AtcoderUpdateComplete {

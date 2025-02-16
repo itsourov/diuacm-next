@@ -16,16 +16,21 @@ const ATCODER_API = {
 } as const;
 
 const fetchWithRetry = async (url: string, retries = 3): Promise<Response> => {
+    let lastError: Error | undefined;
+
     for (let i = 0; i < retries; i++) {
         try {
             const response = await fetch(url, { next: { revalidate: 0 } });
             if (response.ok) return response;
-        } catch {
-            if (i === retries - 1) throw new Error(`Failed to fetch ${url}`);
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+        } catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error));
+            if (i < retries - 1) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
         }
     }
-    throw new Error(`Failed to fetch ${url} after ${retries} retries`);
+    throw lastError ?? new Error(`Failed to fetch ${url} after ${retries} retries`);
 };
 
 const getContests = cache(async (): Promise<AtcoderContest[]> => {

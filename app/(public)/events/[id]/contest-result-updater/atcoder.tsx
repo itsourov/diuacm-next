@@ -12,11 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import { RefreshCcw, Loader2, Clock, User } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import type { AtcoderUpdateEvent, ProcessedUserResult } from "./types/atcoder";
+import { Progress } from "@/components/ui/progress";
 
 interface AtcoderResultsDialogProps {
     eventId: bigint;
@@ -33,39 +32,56 @@ export function AtcoderResultsDialog({
     const [open, setOpen] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [results, setResults] = useState<ProcessedUserResult[]>([]);
+    const [progress, setProgress] = useState(0);
+    const [totalUsers, setTotalUsers] = useState(0);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     // Auto-scroll but allow manual scrolling
     useEffect(() => {
-        if (scrollRef.current) {
-            const scrollElement = scrollRef.current;
-            // Only auto-scroll if user is already at bottom
-            const isAtBottom = scrollElement.scrollHeight - scrollElement.scrollTop === scrollElement.clientHeight;
-            if (isAtBottom) {
-                scrollElement.scrollTop = scrollElement.scrollHeight;
-            }
+        const scrollElement = scrollRef.current;
+        if (!scrollElement) return;
+
+        // Only auto-scroll if user is already at bottom
+        const isAtBottom = Math.abs(
+            (scrollElement.scrollHeight - scrollElement.scrollTop) - 
+            scrollElement.clientHeight
+        ) < 2;
+
+        if (isAtBottom) {
+            scrollElement.scrollTop = scrollElement.scrollHeight;
         }
     }, [results]);
 
     const handleUpdate = useCallback(async () => {
         setIsUpdating(true);
         setResults([]);
+        setProgress(0);
+        setTotalUsers(0);
+
+        const eventSource = new EventSource(
+            `/api/events/${eventId}/atcoder-update?contestId=${encodeURIComponent(contestId)}`
+        );
+
+        const cleanup = () => {
+            eventSource.close();
+            setIsUpdating(false);
+        };
 
         try {
-            const eventSource = new EventSource(
-                `/api/events/${eventId}/atcoder-update?contestId=${encodeURIComponent(contestId)}`
-            );
-
             eventSource.onmessage = (event) => {
                 const data: AtcoderUpdateEvent = JSON.parse(event.data);
 
                 switch (data.type) {
                     case 'progress':
                         setResults(prev => [...prev, ...data.userResults]);
+                        if (data.totalUsers) {
+                            setTotalUsers(data.totalUsers);
+                            const processedCount = data.processedUsers ?? results.length + 1;
+                            setProgress(Math.round((processedCount / data.totalUsers) * 100));
+                        }
                         break;
                     case 'complete':
-                        eventSource.close();
-                        setIsUpdating(false);
+                        cleanup();
                         router.refresh();
                         toast.success("Results Updated", {
                             description: "Contest results have been successfully updated."
@@ -75,27 +91,27 @@ export function AtcoderResultsDialog({
                         toast.error("Update Failed", {
                             description: data.error
                         });
-                        eventSource.close();
-                        setIsUpdating(false);
+                        cleanup();
                         break;
                 }
             };
 
             eventSource.onerror = () => {
-                eventSource.close();
-                setIsUpdating(false);
+                cleanup();
                 toast.error("Connection Error", {
                     description: "Failed to connect to update stream"
                 });
             };
 
+            // Cleanup on unmount or when the callback changes
+            return cleanup;
         } catch (error) {
-            setIsUpdating(false);
+            cleanup();
             toast.error("Update Failed", {
                 description: error instanceof Error ? error.message : String(error)
             });
         }
-    }, [eventId, contestId, router]);
+    }, [eventId, contestId, router, results.length]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -134,11 +150,22 @@ export function AtcoderResultsDialog({
 
                     <StatusInfo currentUser={currentUser} />
 
-                    <Alert className="bg-blue-50/50 dark:bg-blue-950/50 border-blue-100/20 dark:border-blue-500/20">
-                        <AlertDescription>
-                            Fetching results from AtCoder API. Results will update in real-time as they are processed.
-                        </AlertDescription>
-                    </Alert>
+                    {isUpdating && (
+                        <div className="space-y-3">
+                            <Progress value={progress} className="h-2" />
+                            <p className="text-sm text-muted-foreground text-center">
+                                Processing {results.length} of {totalUsers || "..."} users
+                            </p>
+                        </div>
+                    )}
+
+                    {!isUpdating && (
+                        <Alert className="bg-blue-50/50 dark:bg-blue-950/50 border-blue-100/20 dark:border-blue-500/20">
+                            <AlertDescription>
+                                Click the button below to start updating results.
+                            </AlertDescription>
+                        </Alert>
+                    )}
                 </div>
 
                 <div 
@@ -216,15 +243,18 @@ function StatusInfo({ currentUser }: { currentUser?: string }) {
 
     useEffect(() => {
         const updateTime = () => {
-            const now = new Date();
-            const formatted = now.toISOString()
-                .replace('T', ' ')
-                .replace(/\.\d{3}Z$/, '');
-            setCurrentTime(formatted);
+            setCurrentTime(
+                new Date()
+                    .toISOString()
+                    .replace('T', ' ')
+                    .replace(/\.\d{3}Z$/, '')
+            );
         };
 
         updateTime();
         const interval = setInterval(updateTime, 1000);
+        
+        // Cleanup interval on unmount
         return () => clearInterval(interval);
     }, []);
 

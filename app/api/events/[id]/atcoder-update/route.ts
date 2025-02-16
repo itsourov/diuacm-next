@@ -20,22 +20,54 @@ export async function GET(
         async start(controller) {
             try {
                 const results: ProcessedUserResult[] = [];
-                let totalSolved = 0;
-                let totalUpsolved = 0;
-                let presentUsers = 0;
+                let processedUsers = 0;
+                let totalUsers = 0;
+                let firstResult = true;
 
                 for await (const result of processAtcoderResults(BigInt(params.id), contestId)) {
                     results.push(result);
-                    totalSolved += result.solveCount;
-                    totalUpsolved += result.upsolveCount;
-                    if (result.isPresent) presentUsers++;
+                    processedUsers++;
+
+                    if (firstResult) {
+                        // Get total users on first result
+                        const users = await prisma.user.count({
+                            where: {
+                                atcoderHandle: { not: null },
+                                rankListUsers: {
+                                    some: {
+                                        rankList: {
+                                            eventRankLists: {
+                                                some: {
+                                                    event: { id: BigInt(params.id) }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        totalUsers = users;
+                        firstResult = false;
+                    }
 
                     // Send progress update
                     const progressEvent = {
                         type: 'progress',
-                        userResults: [result]
+                        userResults: [result],
+                        totalUsers,
+                        processedUsers
                     };
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify(progressEvent)}\n\n`));
+                }
+
+                let totalSolved = 0;
+                let totalUpsolved = 0;
+                let presentUsers = 0;
+
+                for (const result of results) {
+                    totalSolved += result.solveCount;
+                    totalUpsolved += result.upsolveCount;
+                    if (result.isPresent) presentUsers++;
                 }
 
                 // Send completion event
