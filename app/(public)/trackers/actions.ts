@@ -17,7 +17,7 @@ export async function getTrackers(): Promise<TrackerWithRankLists[]> {
                 }
             },
             orderBy: {
-                createdAt: 'desc'
+                createdAt: 'asc'
             }
         });
 
