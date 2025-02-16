@@ -1,13 +1,12 @@
 import {
     Code2, Trophy, Users,
     ChevronRight,
-    GraduationCap, Terminal,
+    GraduationCap,
     Brain, Timer, MessageSquare,
     CheckCircle2,
     Globe,
     BookOpen, Award, Target,
-    FileCode2, Laptop,
-    Link
+    FileCode2, Laptop
 } from 'lucide-react';
 import HeroSection from "@/app/(public)/(homepage)/HeroSection";
 
