@@ -173,8 +173,9 @@ export async function updateAtcoderResults(
     contestId: string
 ): Promise<UpdateResultsResponse> {
     try {
-        for await (const _ of processAtcoderResults(eventId, contestId, false)) {
+        for await (const result of processAtcoderResults(eventId, contestId, false)) {
             // Process without yielding progress
+            void result; // Explicitly void the result to show intent
         }
         return { success: true };
     } catch (error) {
