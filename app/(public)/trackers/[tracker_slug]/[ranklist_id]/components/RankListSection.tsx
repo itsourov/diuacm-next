@@ -9,6 +9,7 @@ import { RankListUserWithRelations, CurrentUser, User } from "../types";
 import { toggleRankListSubscription, getAllRankListUsers, recalculateRankListScores } from "../actions";
 import PointHistoryModal from "./PointHistoryModal";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface RankListSectionProps {
     rankListId: string;
@@ -189,10 +190,12 @@ export default function RankListSection({
                             {displayedUsers.map((user, index) => (
                                 <tr
                                     key={user.userId}
+                                    onClick={() => setSelectedUser(user)}
                                     className={cn(
                                         "border-b border-gray-100 dark:border-gray-800",
                                         user.userId === currentUser?.id &&
-                                        "bg-blue-50/50 dark:bg-blue-900/10"
+                                        "bg-blue-50/50 dark:bg-blue-900/10",
+                                        "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                                     )}
                                 >
                                     <RankCell index={index} />
@@ -268,7 +271,11 @@ function RankCell({ index }: { index: number }) {
 function UserCell({ user }: { user: User }) {
     return (
         <td className="py-4 px-4">
-            <div className="flex items-center gap-3">
+            <Link
+                href={`/users/${user.username}`}
+                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                onClick={(e) => e.stopPropagation()} // Prevent triggering parent's onClick
+            >
                 <UserAvatar user={user} className="w-10 h-10" />
                 <div>
                     <p className="font-medium text-gray-900 dark:text-white">
@@ -278,7 +285,7 @@ function UserCell({ user }: { user: User }) {
                         @{user.username}
                     </p>
                 </div>
-            </div>
+            </Link>
         </td>
     );
 }
