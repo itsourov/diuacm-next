@@ -6,7 +6,8 @@ import {
     CheckCircle2,
     Globe,
     BookOpen, Award, Target,
-    FileCode2, Laptop
+    FileCode2, Laptop,
+    Link
 } from 'lucide-react';
 import HeroSection from "@/app/(public)/(homepage)/HeroSection";
 
@@ -101,7 +102,7 @@ export default function Homepage() {
     return (
         <div className="min-h-screen bg-white dark:bg-gray-900 font-sans">
 
-            <HeroSection/>
+            <HeroSection />
 
 
             {/* What is DIU ACM Section */}
@@ -126,7 +127,7 @@ export default function Homepage() {
                                 ].map((point, index) => (
                                     <li key={index}
                                         className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0"/>
+                                        <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
                                         {point}
                                     </li>
                                 ))}
@@ -136,13 +137,13 @@ export default function Homepage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-4">
                                     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-                                        <Trophy className="w-8 h-8 text-amber-500 mb-2"/>
+                                        <Trophy className="w-8 h-8 text-amber-500 mb-2" />
                                         <h3 className="font-bold text-gray-900 dark:text-white">Contest Success</h3>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">National & International
                                             achievements</p>
                                     </div>
                                     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-                                        <Brain className="w-8 h-8 text-purple-500 mb-2"/>
+                                        <Brain className="w-8 h-8 text-purple-500 mb-2" />
                                         <h3 className="font-bold text-gray-900 dark:text-white">Skill Development</h3>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">Structured learning
                                             paths</p>
@@ -150,13 +151,13 @@ export default function Homepage() {
                                 </div>
                                 <div className="space-y-4 mt-8">
                                     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-                                        <Users className="w-8 h-8 text-blue-500 mb-2"/>
+                                        <Users className="w-8 h-8 text-blue-500 mb-2" />
                                         <h3 className="font-bold text-gray-900 dark:text-white">Community</h3>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">Supportive learning
                                             environment</p>
                                     </div>
                                     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-                                        <Target className="w-8 h-8 text-red-500 mb-2"/>
+                                        <Target className="w-8 h-8 text-red-500 mb-2" />
                                         <h3 className="font-bold text-gray-900 dark:text-white">ICPC Focus</h3>
                                         <p className="text-sm text-gray-600 dark:text-gray-400">Dedicated
                                             preparation</p>
@@ -190,12 +191,12 @@ export default function Homepage() {
                                     className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl"
                                 />
                                 <program.icon
-                                    className={`w-12 h-12 mb-6 text-transparent bg-clip-text bg-gradient-to-r ${program.color}`}/>
+                                    className={`w-12 h-12 mb-6 text-transparent bg-clip-text bg-gradient-to-r ${program.color}`} />
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{program.title}</h3>
                                 <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">{program.description}</p>
                                 <a href="#"
-                                   className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">
-                                    Learn more <ChevronRight className="w-4 h-4 ml-1"/>
+                                    className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">
+                                    Learn more <ChevronRight className="w-4 h-4 ml-1" />
                                 </a>
                             </div>
                         ))}
@@ -230,7 +231,7 @@ export default function Homepage() {
                                         <div className="flex flex-wrap gap-2">
                                             {competition.phases.map((phase, i) => (
                                                 <span key={i}
-                                                      className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
+                                                    className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm">
                                                     {phase}
                                                 </span>
                                             ))}
@@ -262,13 +263,13 @@ export default function Homepage() {
                     <div className="grid md:grid-cols-3 gap-8">
                         <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
                             <div className="flex items-center gap-3 mb-6">
-                                <Trophy className="w-6 h-6 text-amber-500"/>
+                                <Trophy className="w-6 h-6 text-amber-500" />
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Contest Rules</h3>
                             </div>
                             <ul className="space-y-4">
                                 {rules.contests.map((rule, index) => (
                                     <li key={index} className="flex items-start gap-3">
-                                        <CheckCircle2 className="w-5 h-5 mt-0.5 text-green-500 flex-shrink-0"/>
+                                        <CheckCircle2 className="w-5 h-5 mt-0.5 text-green-500 flex-shrink-0" />
                                         <span className="text-gray-600 dark:text-gray-400">{rule}</span>
                                     </li>
                                 ))}
@@ -277,13 +278,13 @@ export default function Homepage() {
 
                         <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
                             <div className="flex items-center gap-3 mb-6">
-                                <Laptop className="w-6 h-6 text-blue-500"/>
+                                <Laptop className="w-6 h-6 text-blue-500" />
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Lab Rules</h3>
                             </div>
                             <ul className="space-y-4">
                                 {rules.lab.map((rule, index) => (
                                     <li key={index} className="flex items-start gap-3">
-                                        <CheckCircle2 className="w-5 h-5 mt-0.5 text-green-500 flex-shrink-0"/>
+                                        <CheckCircle2 className="w-5 h-5 mt-0.5 text-green-500 flex-shrink-0" />
                                         <span className="text-gray-600 dark:text-gray-400">{rule}</span>
                                     </li>
                                 ))}
@@ -292,14 +293,14 @@ export default function Homepage() {
 
                         <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
                             <div className="flex items-center gap-3 mb-6">
-                                <Globe className="w-6 h-6 text-purple-500"/>
+                                <Globe className="w-6 h-6 text-purple-500" />
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Online Contest
                                     Rules</h3>
                             </div>
                             <ul className="space-y-4">
                                 {rules.online.map((rule, index) => (
                                     <li key={index} className="flex items-start gap-3">
-                                        <CheckCircle2 className="w-5 h-5 mt-0.5 text-green-500 flex-shrink-0"/>
+                                        <CheckCircle2 className="w-5 h-5 mt-0.5 text-green-500 flex-shrink-0" />
                                         <span className="text-gray-600 dark:text-gray-400">{rule}</span>
                                     </li>
                                 ))}
@@ -346,7 +347,7 @@ export default function Homepage() {
                                 <div key={index} className="flex gap-4">
                                     <div
                                         className="flex-shrink-0 w-12 h-12 rounded-2xl bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center">
-                                        <item.icon className={`w-6 h-6 ${item.color}`}/>
+                                        <item.icon className={`w-6 h-6 ${item.color}`} />
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{item.title}</h3>
@@ -380,7 +381,7 @@ export default function Homepage() {
                                         <div
                                             className="absolute left-0 top-0 bottom-0 w-px bg-blue-200 dark:bg-blue-800">
                                             <div
-                                                className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-blue-500"/>
+                                                className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-blue-500" />
                                         </div>
                                         <h4 className="font-bold text-gray-900 dark:text-white mb-2">{phase.phase}</h4>
                                         <p className="text-gray-600 dark:text-gray-400 mb-1">{phase.details}</p>
@@ -397,7 +398,7 @@ export default function Homepage() {
             {/* CTA Section */}
             <section className="py-20 bg-white dark:bg-gray-900 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-5 dark:opacity-10">
-                    <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent"/>
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent" />
                 </div>
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -421,7 +422,7 @@ export default function Homepage() {
                                     className="flex gap-4 bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl transition-all duration-300 hover:shadow-lg"
                                 >
                                     <div className={`${step.color} mt-1`}>
-                                        <step.icon className="w-6 h-6"/>
+                                        <step.icon className="w-6 h-6" />
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -454,7 +455,7 @@ export default function Homepage() {
                                             "Mentorship opportunities"
                                         ].map((benefit, index) => (
                                             <li key={index} className="flex items-center gap-2">
-                                                <CheckCircle2 className="w-5 h-5 text-blue-300"/>
+                                                <CheckCircle2 className="w-5 h-5 text-blue-300" />
                                                 <span>{benefit}</span>
                                             </li>
                                         ))}
@@ -462,13 +463,13 @@ export default function Homepage() {
                                 </div>
 
                                 <div className="flex flex-wrap gap-4 pt-4">
-                                    <button
+                                    <Link href='https://t.me/+X94KLytY-Kk5NzU9'
                                         className="px-6 py-3 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center gap-2">
-                                        <MessageSquare className="w-4 h-4"/> Join Telegram
-                                    </button>
+                                        <MessageSquare className="w-4 h-4" /> Join Telegram
+                                    </Link>
                                     <button
                                         className="px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
-                                        <Terminal className="w-4 h-4"/> Visit Lab
+                                        <Terminal className="w-4 h-4" /> Visit Lab
                                     </button>
                                 </div>
                             </div>
