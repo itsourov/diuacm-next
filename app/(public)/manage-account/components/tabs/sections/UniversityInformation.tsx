@@ -50,7 +50,7 @@ export function UniversityInformation({ form }: UniversityInformationProps) {
                             "focus:ring-2 focus:ring-blue-500 focus:border-transparent",
                             "placeholder:text-gray-500 dark:placeholder:text-gray-400"
                         )}
-                        placeholder="e.g., Computer Science & Engineering"
+                        placeholder="e.g., CSE"
                     />
                 </FormField>
 
