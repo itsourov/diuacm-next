@@ -42,9 +42,10 @@ const getSubmissions = cache(async (username: string, fromSecond: number): Promi
 
 export async function GET(
     request: Request,
-    context: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
-    const eventId = BigInt(context.params.id);
+    const params = await context.params;
+    const eventId = BigInt(params.id);
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
