@@ -10,19 +10,26 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 
-export default function GridViewClient({ data }: { data: GridViewData }) {
+interface GridViewClientProps {
+  data: GridViewData;
+  title: string; // Add title prop
+}
+
+export default function GridViewClient({ data, title }: GridViewClientProps) {
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const tableContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollTop = useRef(0);
 
-  const getSolveData = (userId: string, eventId: bigint): UserSolveData => {
+  const getSolveData = (userId: string, eventId: bigint): UserSolveData | null => {
     const user = data.users.find(u => u.user.id === userId);
     const solveStat = user?.solveStats.find(s => s.eventId === eventId);
     
-    if (!solveStat) return { solveCount: 0, upsolveCount: 0, points: 0 };
+    if (!solveStat) return null; // Return null if no solvestat exists
 
     const event = data.events.find(e => e.id === eventId);
-    if (!event) return { solveCount: 0, upsolveCount: 0, points: 0 };
+    if (!event) return null;
 
     const contestPoints = Number(solveStat.solveCount) * event.weight;
     const upsolvePoints = Number(solveStat.upsolveCount) * event.weight * data.weightOfUpsolve;
@@ -31,6 +38,7 @@ export default function GridViewClient({ data }: { data: GridViewData }) {
       solveCount: Number(solveStat.solveCount),
       upsolveCount: Number(solveStat.upsolveCount),
       points: contestPoints + upsolvePoints,
+      isPresent: solveStat.isPresent,
     };
   };
 
@@ -54,13 +62,22 @@ export default function GridViewClient({ data }: { data: GridViewData }) {
     if (hasPrevEvent) setCurrentEventIndex(prev => prev - 1);
   };
 
-  // Add scroll handler
+  // Modify scroll handler to include header visibility
   useEffect(() => {
     const container = tableContainerRef.current;
     if (!container) return;
 
     const handleScroll = () => {
+      const scrollTop = container.scrollTop;
       setIsScrolled(container.scrollLeft > 50);
+      
+      // Hide header when scrolling down, show when scrolling up
+      if (scrollTop > lastScrollTop.current && scrollTop > 100) {
+        setIsHeaderVisible(false);
+      } else {
+        setIsHeaderVisible(true);
+      }
+      lastScrollTop.current = scrollTop;
     };
 
     container.addEventListener('scroll', handleScroll);
@@ -69,14 +86,21 @@ export default function GridViewClient({ data }: { data: GridViewData }) {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Grid View
-        </h1>
+      {/* Modified Header */}
+      <div className={cn(
+        "bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700",
+        "transition-all duration-300 ease-in-out",
+        "sticky top-0 z-50",
+        isHeaderVisible ? "h-16 opacity-100" : "h-0 opacity-0 overflow-hidden"
+      )}>
+        <div className="h-16 flex items-center px-6">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white truncate">
+            {title}
+          </h1>
+        </div>
       </div>
 
-      {/* Main content with fixed header */}
+      {/* Main content */}
       <div className="flex-1 overflow-hidden">
         <div ref={tableContainerRef} className="h-full overflow-auto">
           <table className="w-full border-separate border-spacing-0">
@@ -165,9 +189,11 @@ export default function GridViewClient({ data }: { data: GridViewData }) {
                         key={event.id.toString()}
                         className={cn(
                           "px-4 py-3 border-b border-r border-gray-200 dark:border-gray-700",
-                          solveData.solveCount > 0 || solveData.upsolveCount > 0
-                            ? "bg-green-50 dark:bg-green-900/20"
-                            : ""
+                          solveData && !solveData.isPresent 
+                            ? "bg-red-50 dark:bg-red-900/20"
+                            : solveData && (solveData.solveCount > 0 || solveData.upsolveCount > 0)
+                              ? "bg-green-50 dark:bg-green-900/20"
+                              : ""
                         )}
                       >
                         <SolveDataContent solveData={solveData} />
@@ -185,26 +211,43 @@ export default function GridViewClient({ data }: { data: GridViewData }) {
 }
 
 // Helper component for solve data display
-function SolveDataContent({ solveData }: { solveData: UserSolveData }) {
-  if (solveData.solveCount === 0 && solveData.upsolveCount === 0) {
-    return <div className="text-sm text-gray-400 dark:text-gray-600">-</div>;
-  }
+function SolveDataContent({ solveData }: { solveData: UserSolveData | null }) {
+  if (!solveData) return null; // Return nothing if no solvestat exists
 
   return (
     <div className="space-y-1">
-      {solveData.solveCount > 0 && (
-        <div className="text-sm text-green-600 dark:text-green-400">
-          {solveData.solveCount} solve{solveData.solveCount > 1 ? 's' : ''}
-        </div>
+      {!solveData.isPresent && (
+        <div className="text-sm text-red-600 dark:text-red-400">Absent</div>
       )}
-      {solveData.upsolveCount > 0 && (
-        <div className="text-sm text-orange-600 dark:text-orange-400">
-          {solveData.upsolveCount} upsolve{solveData.upsolveCount > 1 ? 's' : ''}
-        </div>
+      {solveData.solveCount === 0 && solveData.upsolveCount === 0 ? (
+        <div className="text-sm text-gray-400 dark:text-gray-600">-</div>
+      ) : (
+        <>
+          {solveData.solveCount > 0 && (
+            <div className="text-sm text-green-600 dark:text-green-400">
+              {solveData.solveCount} solve{solveData.solveCount > 1 ? 's' : ''}
+            </div>
+          )}
+          {solveData.upsolveCount > 0 && (
+            <div className="text-sm text-orange-600 dark:text-orange-400">
+              {solveData.upsolveCount} upsolve{solveData.upsolveCount > 1 ? 's' : ''}
+            </div>
+          )}
+          {(solveData.solveCount > 0 || solveData.upsolveCount > 0) && (
+            <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
+              {solveData.points.toFixed(2)} points
+            </div>
+          )}
+        </>
       )}
-      <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
-        {solveData.points.toFixed(2)} points
-      </div>
     </div>
   );
+}
+
+// Update the types:
+interface UserSolveData {
+  solveCount: number;
+  upsolveCount: number;
+  points: number;
+  isPresent: boolean;
 }

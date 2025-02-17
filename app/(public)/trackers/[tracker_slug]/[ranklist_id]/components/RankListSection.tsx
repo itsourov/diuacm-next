@@ -4,12 +4,13 @@ import { useEffect, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import UserAvatar from "@/components/UserAvatar";
-import { Trophy, Award, Star, Loader2 } from "lucide-react";
+import { Trophy, Award, Star, Loader2, ArrowUpRight } from "lucide-react";
 import { RankListUserWithRelations, CurrentUser, User } from "../types";
 import { toggleRankListSubscription, getAllRankListUsers, recalculateRankListScores } from "../actions";
 import PointHistoryModal from "./PointHistoryModal";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface RankListSectionProps {
     rankListId: string;
@@ -31,6 +32,7 @@ export default function RankListSection({
     const [recalculateLoading, setRecalculateLoading] = useState(false);
     const { toast } = useToast();
     const PAGE_SIZE = 20;
+    const pathname = usePathname();
 
     const loadUsers = useCallback(async () => {
         setLoading(true);
@@ -131,25 +133,39 @@ export default function RankListSection({
 
     return (
         <div className="space-y-8">
+            {/* Grid View Link - Moved to top */}
+            <Link
+                href={`${pathname}/grid`}
+                className={cn(
+                    "block w-full",
+                    "bg-gradient-to-r from-blue-500 to-indigo-500",
+                    "px-6 py-4 rounded-2xl", // Made even larger
+                    "text-white font-medium",
+                    "border border-blue-600/20",
+                    "shadow-lg shadow-blue-500/30",
+                    "hover:shadow-blue-500/40 hover:scale-[1.02]",
+                    "dark:from-blue-600 dark:to-indigo-600",
+                    "dark:shadow-blue-500/20 dark:hover:shadow-blue-500/30",
+                    "transition-all duration-200"
+                )}
+            >
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-xl font-bold">Grid View</h3>
+                        <p className="text-blue-100 dark:text-blue-200">
+                            View all contests and participants in a grid layout
+                        </p>
+                    </div>
+                    <ArrowUpRight className="w-6 h-6" />
+                </div>
+            </Link>
+
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     Participants
                 </h2>
                 <div className="flex flex-col sm:flex-row gap-4">
-                    <Link
-                        href={`${window.location.pathname}/grid`}
-                        className={cn(
-                            "inline-flex items-center justify-center",
-                            "px-4 py-2 rounded-lg",
-                            "bg-white dark:bg-gray-800",
-                            "border border-gray-200 dark:border-gray-700",
-                            "text-gray-700 dark:text-gray-300",
-                            "hover:bg-gray-100 dark:hover:bg-gray-700",
-                            "transition-colors"
-                        )}
-                    >
-                        View Grid
-                    </Link>
+                    {/* Remove the View Grid button from here */}
                     <Button
                         variant="outline"
                         onClick={handleRecalculateScores}

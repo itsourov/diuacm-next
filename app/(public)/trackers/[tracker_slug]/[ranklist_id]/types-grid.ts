@@ -9,6 +9,7 @@ export interface GridData {
       eventId: bigint;
       solveCount: bigint;
       upsolveCount: bigint;
+      isPresent: boolean;
     }>;
   }>;
 }
@@ -21,4 +22,12 @@ export interface UserSolveData {
 
 export interface GridViewData extends GridData {
   weightOfUpsolve: number;
+}
+
+export interface SolveStat {
+  userId: string;
+  eventId: bigint;
+  solveCount: bigint;
+  upsolveCount: bigint;
+  isPresent: boolean;
 }

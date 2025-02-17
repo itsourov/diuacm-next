@@ -71,6 +71,7 @@ export default async function GridPage({ params }: PageProps) {
       eventId: true,
       solveCount: true,
       upsolveCount: true,
+      isPresent: true,  // Add this field
     },
   });
 
@@ -87,5 +88,8 @@ export default async function GridPage({ params }: PageProps) {
     weightOfUpsolve: rankList.weightOfUpsolve,
   };
 
-  return <GridViewClient data={gridData} />;
+  return <GridViewClient 
+    data={gridData} 
+    title={rankList.title} // Pass the title
+  />;
 }
