@@ -6,6 +6,7 @@ import SolveStatsSection from "./SolveStatsSection";
 import RankListsSection from "./RankListsSection";
 import { cn } from "@/lib/utils";
 import { Event, SolveStat } from "@prisma/client";
+import { useSearchParams, useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -55,13 +56,34 @@ export default function EventTabs({
   userSolveStat,
   defaultTab = "solve-stats",
 }: EventTabsProps) {
-  // Set default tab based on event type and attendance status
-  const effectiveDefaultTab = event.type === 'contest' 
-    ? defaultTab 
-    : (event.openForAttendance ? "attendance" : "solve-stats");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Get tab from URL or use default
+  const urlTab = searchParams.get('tab');
+  const isValidTab = (tab: string | null): tab is "attendance" | "solve-stats" | "ranklists" => {
+    return tab === "attendance" || tab === "solve-stats" || tab === "ranklists";
+  };
+
+  // Determine effective default tab based on URL, event type and attendance status
+  const effectiveDefaultTab = isValidTab(urlTab) ? urlTab :
+    (event.type === 'contest' 
+      ? defaultTab 
+      : (event.openForAttendance ? "attendance" : "solve-stats"));
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', value);
+    router.replace(url.toString());
+  };
 
   return (
-    <Tabs defaultValue={effectiveDefaultTab} className="space-y-8">
+    <Tabs 
+      defaultValue={effectiveDefaultTab} 
+      className="space-y-8"
+      onValueChange={handleTabChange}
+    >
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-2">
         <TabsList 
           className={cn(
