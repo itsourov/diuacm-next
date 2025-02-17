@@ -136,6 +136,20 @@ export default function RankListSection({
                     Participants
                 </h2>
                 <div className="flex flex-col sm:flex-row gap-4">
+                    <Link
+                        href={`${window.location.pathname}/grid`}
+                        className={cn(
+                            "inline-flex items-center justify-center",
+                            "px-4 py-2 rounded-lg",
+                            "bg-white dark:bg-gray-800",
+                            "border border-gray-200 dark:border-gray-700",
+                            "text-gray-700 dark:text-gray-300",
+                            "hover:bg-gray-100 dark:hover:bg-gray-700",
+                            "transition-colors"
+                        )}
+                    >
+                        View Grid
+                    </Link>
                     <Button
                         variant="outline"
                         onClick={handleRecalculateScores}
