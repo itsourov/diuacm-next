@@ -1,6 +1,5 @@
 import {
     Code2, Trophy, Users,
-    ChevronRight,
     GraduationCap,
     Brain, Timer, MessageSquare,
     CheckCircle2,
@@ -199,10 +198,10 @@ export default function Homepage() {
                                     className={`w-12 h-12 mb-6 text-transparent bg-clip-text bg-gradient-to-r ${program.color}`} />
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{program.title}</h3>
                                 <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">{program.description}</p>
-                                <a href="#"
+                                {/* <a href="#"
                                     className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">
                                     Learn more <ChevronRight className="w-4 h-4 ml-1" />
-                                </a>
+                                </a> */}
                             </div>
                         ))}
                     </div>
