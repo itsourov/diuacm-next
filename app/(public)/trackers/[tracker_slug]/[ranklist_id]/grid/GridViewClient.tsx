@@ -81,24 +81,35 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
           <table className="w-full border-separate border-spacing-0">
             <thead className="sticky top-0 z-30">
               <tr className="bg-white dark:bg-gray-800 shadow-sm">
-                {/* User column header - Modified width transition */}
+                {/* Add Rank header */}
                 <th className={cn(
-                  "sticky left-0 z-40 bg-white dark:bg-gray-800 px-4 py-4 border-b border-r border-gray-200 dark:border-gray-700",
-                  isScrolled ? "w-[60px]" : "w-[200px]"
+                  "sticky left-0 z-40 bg-white dark:bg-gray-800 px-4 py-4 border-b border-r border-gray-200 dark:border-gray-700 w-[50px]"
+                )}>
+                  <div className="font-medium text-sm text-gray-900 dark:text-white">
+                    #
+                  </div>
+                </th>
+
+                {/* Adjust User column position */}
+                <th className={cn(
+                  "sticky z-40 bg-white dark:bg-gray-800 px-4 py-4 border-b border-r border-gray-200 dark:border-gray-700",
+                  isScrolled ? "left-[50px] w-[60px]" : "left-[50px] w-[200px]"
                 )}>
                   <div className="font-medium text-sm text-gray-900 dark:text-white md:block hidden">
                     User
                   </div>
                 </th>
-                {/* Points column header - Modified position */}
+
+                {/* Adjust Points column position */}
                 <th className={cn(
                   "sticky z-40 bg-white dark:bg-gray-800 px-4 py-4 border-b border-r border-gray-200 dark:border-gray-700 w-[80px]",
-                  isScrolled ? "left-[60px]" : "left-[200px]"
+                  isScrolled ? "left-[110px]" : "left-[250px]"
                 )}>
                   <div className="font-medium text-sm text-gray-900 dark:text-white">
                     Points
                   </div>
                 </th>
+
                 {/* Event column headers */}
                 {data.events.map((event) => (
                   <th key={event.id.toString()} className="bg-white dark:bg-gray-800 px-4 py-3 border-b border-r border-gray-200 dark:border-gray-700 min-w-[180px]">
@@ -118,13 +129,19 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
             </thead>
 
             <tbody className="bg-white dark:bg-gray-900">
-              {data.users.map((user) => (
-                <tr key={user.user.id} 
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                  {/* User info cell - Modified for proper collapse */}
+              {data.users.map((user, index) => (
+                <tr key={user.user.id}>
+                  {/* Rank cell */}
+                  <td className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-3 border-b border-r border-gray-200 dark:border-gray-700 text-center">
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
+                      {index + 1}
+                    </span>
+                  </td>
+
+                  {/* Adjust User cell position */}
                   <td className={cn(
-                    "sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-3 border-b border-r border-gray-200 dark:border-gray-700",
-                    isScrolled ? "w-[60px]" : "w-[200px]"
+                    "sticky z-20 bg-white dark:bg-gray-900 px-4 py-3 border-b border-r border-gray-200 dark:border-gray-700",
+                    isScrolled ? "left-[50px] w-[60px]" : "left-[50px] w-[200px]"
                   )}>
                     <Link href={`/users/${user.user.username}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                       <UserAvatar user={user.user} className="w-8 h-8 shrink-0" />
@@ -142,10 +159,10 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
                     </Link>
                   </td>
                   
-                  {/* Score cell - Modified position */}
+                  {/* Adjust Score cell position */}
                   <td className={cn(
                     "sticky z-20 bg-white dark:bg-gray-900 px-4 py-3 border-b border-r border-gray-200 dark:border-gray-700",
-                    isScrolled ? "left-[60px]" : "left-[200px]"
+                    isScrolled ? "left-[110px]" : "left-[250px]"
                   )}>
                     <div className="font-mono font-medium text-blue-600 dark:text-blue-400">
                       {user.score.toFixed(2)}
