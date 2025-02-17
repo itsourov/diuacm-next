@@ -25,9 +25,8 @@ import { toast } from "sonner";
 
 interface CodeforcesResultsDialogProps {
     eventId: bigint;
-    contestId: string;
     currentUser?: string;
-    userId?: string; // Add userId prop
+    userId?: string;
 }
 
 function StatusInfo({ currentUser }: { currentUser?: string }) {
@@ -65,7 +64,7 @@ function StatusInfo({ currentUser }: { currentUser?: string }) {
     );
 }
 
-export function CodeforcesResultsDialog({ eventId, contestId, currentUser, userId }: CodeforcesResultsDialogProps) {
+export function CodeforcesResultsDialog({ eventId, currentUser, userId }: CodeforcesResultsDialogProps) {
     const [open, setOpen] = useState<boolean>(false);
     const [isUpdatingAll, setIsUpdatingAll] = useState<boolean>(false);
     const [isUpdatingSelf, setIsUpdatingSelf] = useState<boolean>(false);
@@ -85,7 +84,6 @@ export function CodeforcesResultsDialog({ eventId, contestId, currentUser, userI
 
             const result = await updateCodeforcesResults(
                 eventId,
-                contestId,
                 updateSelf ? userId : undefined
             );
 

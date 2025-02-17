@@ -181,8 +181,8 @@ export default async function EventPage({ params }: EventPageProps) {
             {event.type === 'contest' && event.eventLink?.includes('codeforces.com') && (
               <CodeforcesResultsDialog
                 eventId={event.id}
-                contestId={getCodeforcesContestId(event.eventLink)}
                 currentUser={session?.user?.name ?? 'guest'}
+                userId={session?.user?.id}
               />
             )}
 
@@ -221,11 +221,6 @@ export default async function EventPage({ params }: EventPageProps) {
 
 function getVjudgeContestId(url: string): string {
   const match = url.match(/contest\/(\d+)/);
-  return match ? match[1] : "";
-}
-
-function getCodeforcesContestId(url: string): string {
-  const match = url.match(/contests\/(\d+)/);
   return match ? match[1] : "";
 }
 

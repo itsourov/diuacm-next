@@ -136,13 +136,13 @@ function processUserResults(
 
 export async function updateCodeforcesResults(
     eventId: bigint,
-    contestId: string,
     singleUserId?: string
 ): Promise<UpdateResultsResponse> {
     try {
         const event = await prisma.event.findUnique({
             where: { id: eventId },
-            include: {
+            select: {
+                eventLink: true,
                 eventRankLists: {
                     include: {
                         rankList: {
@@ -164,8 +164,16 @@ export async function updateCodeforcesResults(
             }
         });
 
-        if (!event) {
-            return { success: false, error: "Event not found" };
+        if (!event?.eventLink) {
+            return { success: false, error: "Event link not found" };
+        }
+
+        // Extract contest ID from event link
+        const contestIdMatch = event.eventLink.match(/contests\/(\d+)/);
+        const contestId = contestIdMatch?.[1];
+
+        if (!contestId) {
+            return { success: false, error: "Invalid Codeforces contest URL" };
         }
 
         const users = event.eventRankLists
