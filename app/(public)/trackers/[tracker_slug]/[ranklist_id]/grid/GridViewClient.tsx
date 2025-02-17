@@ -1,22 +1,19 @@
 "use client";
 
-import { DateTime } from "@/lib/utils/datetime";
+// Remove unused imports
 import { GridViewData, UserSolveData } from "../types-grid";
 import UserAvatar from "@/components/UserAvatar";
 import { formatName, formatUsername, truncateText } from "../utils/format";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 
 interface GridViewClientProps {
   data: GridViewData;
-  title: string; // Add title prop
+  title: string;
 }
 
 export default function GridViewClient({ data, title }: GridViewClientProps) {
-  const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -50,19 +47,7 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
     });
   };
 
-  const currentEvent = data.events[currentEventIndex];
-  const hasNextEvent = currentEventIndex < data.events.length - 1;
-  const hasPrevEvent = currentEventIndex > 0;
-
-  const handleNextEvent = () => {
-    if (hasNextEvent) setCurrentEventIndex(prev => prev + 1);
-  };
-
-  const handlePrevEvent = () => {
-    if (hasPrevEvent) setCurrentEventIndex(prev => prev - 1);
-  };
-
-  // Modify scroll handler to include header visibility
+  // Remove mobile navigation related code
   useEffect(() => {
     const container = tableContainerRef.current;
     if (!container) return;
@@ -210,16 +195,18 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
   );
 }
 
-// Helper component for solve data display
+// Update SolveDataContent to use proper type checking
 function SolveDataContent({ solveData }: { solveData: UserSolveData | null }) {
-  if (!solveData) return null; // Return nothing if no solvestat exists
+  if (!solveData) return null;
+
+  const hasActivity = solveData.solveCount > 0 || solveData.upsolveCount > 0;
 
   return (
     <div className="space-y-1">
       {!solveData.isPresent && (
         <div className="text-sm text-red-600 dark:text-red-400">Absent</div>
       )}
-      {solveData.solveCount === 0 && solveData.upsolveCount === 0 ? (
+      {!hasActivity ? (
         <div className="text-sm text-gray-400 dark:text-gray-600">-</div>
       ) : (
         <>
@@ -233,18 +220,16 @@ function SolveDataContent({ solveData }: { solveData: UserSolveData | null }) {
               {solveData.upsolveCount} upsolve{solveData.upsolveCount > 1 ? 's' : ''}
             </div>
           )}
-          {(solveData.solveCount > 0 || solveData.upsolveCount > 0) && (
-            <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
-              {solveData.points.toFixed(2)} points
-            </div>
-          )}
+          <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
+            {solveData.points.toFixed(2)} points
+          </div>
         </>
       )}
     </div>
   );
 }
 
-// Update the types:
+// Define interface at top level
 interface UserSolveData {
   solveCount: number;
   upsolveCount: number;
