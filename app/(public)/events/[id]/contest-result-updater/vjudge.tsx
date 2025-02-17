@@ -29,7 +29,6 @@ import { toast } from "sonner";
 
 interface VjudgeResultsDialogProps {
     eventId: bigint;
-    contestId: string;
     currentUser?: string;
 }
 
@@ -89,7 +88,7 @@ function StatusInfo({ currentUser }: { currentUser?: string }) {
     );
 }
 
-export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeResultsDialogProps) {
+export function VjudgeResultsDialog({ eventId, currentUser }: VjudgeResultsDialogProps) {
     const [open, setOpen] = useState<boolean>(false);
     const [sessionId, setSessionId] = useState<string>("");
     const [isValidating, setIsValidating] = useState<boolean>(false);
@@ -148,7 +147,6 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
 
             const result = await updateVjudgeResults({
                 eventId,
-                contestId,
                 sessionId: withAuth ? sessionId : undefined,
             });
 
@@ -177,7 +175,7 @@ export function VjudgeResultsDialog({ eventId, contestId, currentUser }: VjudgeR
             setIsUpdatingWithAuth(false);
             setIsUpdatingWithoutAuth(false);
         }
-    }, [contestId, eventId, sessionId, setOpen]);
+    }, [eventId, sessionId, setOpen]);
 
     useEffect(() => {
         if (open && !showSessionInput) {

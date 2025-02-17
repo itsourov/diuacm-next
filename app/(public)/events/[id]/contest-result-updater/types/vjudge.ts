@@ -38,6 +38,5 @@ export interface ValidateSessionResponse {
 
 export interface UpdateVjudgeResultsParams {
     eventId: bigint;
-    contestId: string;
     sessionId?: string;
 }

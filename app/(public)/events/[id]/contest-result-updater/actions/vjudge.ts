@@ -120,16 +120,15 @@ export async function validateVjudgeSession(sessionId: string): Promise<Validate
 
 export async function updateVjudgeResults({
     eventId,
-    contestId,
     sessionId
 }: UpdateVjudgeResultsParams): Promise<UpdateResultsResponse> {
     try {
-        log(`Starting update for contest ${contestId}`);
+        log(`Starting update for event ${eventId}`);
 
-        // Updated query to match new schema structure
         const event = await prisma.event.findUnique({
-            where: { id: BigInt(eventId) },
-            include: {
+            where: { id: eventId },
+            select: {
+                eventLink: true,
                 eventRankLists: {
                     include: {
                         rankList: {
@@ -152,11 +151,17 @@ export async function updateVjudgeResults({
             }
         });
 
-        if (!event || event.eventRankLists.length === 0) {
-            return { success: false, error: "Event or ranklists not found" };
+        if (!event?.eventLink) {
+            return { success: false, error: "Event not found or missing event link" };
         }
 
-        // Get unique users from all ranklists associated with the event
+        const contestIdMatch = event.eventLink.match(/contest\/(\d+)/);
+        const contestId = contestIdMatch?.[1];
+
+        if (!contestId) {
+            return { success: false, error: "Invalid Vjudge contest URL" };
+        }
+
         const users = event.eventRankLists
             .flatMap(erl => erl.rankList.rankListUsers)
             .map(rlu => rlu.user)

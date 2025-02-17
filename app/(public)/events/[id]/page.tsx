@@ -173,7 +173,6 @@ export default async function EventPage({ params }: EventPageProps) {
             {event.type === 'contest' && event.eventLink?.includes('vjudge.net') && (
               <VjudgeResultsDialog
                 eventId={event.id}
-                contestId={getVjudgeContestId(event.eventLink)}
                 currentUser={session?.user?.name ?? 'guest'}
               />
             )}
@@ -217,10 +216,5 @@ export default async function EventPage({ params }: EventPageProps) {
       </div>
     </div>
   );
-}
-
-function getVjudgeContestId(url: string): string {
-  const match = url.match(/contest\/(\d+)/);
-  return match ? match[1] : "";
 }
 
