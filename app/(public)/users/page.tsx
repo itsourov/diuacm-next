@@ -5,6 +5,7 @@ import UserGrid from './components/UserGrid';
 import Pagination from "@/components/shared/Pagination";
 import { UsersSearchParams } from "./types";
 import EmptyState from './components/EmptyState';
+import { Metadata } from 'next';
 
 type PageProps = {
     searchParams: Promise<{
@@ -17,6 +18,11 @@ type PageProps = {
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+    title: 'Users Directory | DIU ACM',
+    description: 'Connect with fellow competitive programmers from Daffodil International University. Find and follow other programmers, check their ratings and competitive programming handles.',
+};
 
 export default async function UsersPage({ searchParams }: PageProps) {
     // Await the searchParams before using them

@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import { getUser } from './actions';
 import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
@@ -7,6 +8,20 @@ interface PageProps {
     params: Promise<{
         username: string;
     }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const resolvedParams = await params;
+    const user = await getUser(resolvedParams.username);
+
+    return {
+        title: `${user.name} (@${user.username}) | DIU ACM`,
+        description: `View ${user.name}'s competitive programming profile. ${
+            user.department ? `${user.department} student at DIU. ` : ''
+        }${
+            user.maxCfRating ? `Codeforces max rating: ${user.maxCfRating}` : ''
+        }`.trim(),
+    };
 }
 
 export const dynamic = 'force-dynamic';

@@ -91,7 +91,7 @@ export default function Navbar() {
     };
 
     const userNavItems: UserNavItem[] = [
-        { name: 'Profile', href: '/', icon: UserIcon },
+        // { name: 'Profile', href: '/', icon: UserIcon },
         { name: 'Manage Account', href: '/manage-account', icon: Settings },
         {
             name: 'Sign out',
