@@ -189,7 +189,6 @@ export default async function EventPage({ params }: EventPageProps) {
             {event.type === 'contest' && event.eventLink?.includes('atcoder.jp') && (
               <AtcoderResultsDialog
                 eventId={event.id}
-                contestId={getAtcoderContestId(event.eventLink)}
                 currentUser={session?.user?.name ?? 'guest'}
               />
             )}
@@ -230,7 +229,3 @@ function getCodeforcesContestId(url: string): string {
   return match ? match[1] : "";
 }
 
-function getAtcoderContestId(url: string): string {
-  const match = url.match(/contests\/([^/]+)/);
-  return match ? match[1] : "";
-}

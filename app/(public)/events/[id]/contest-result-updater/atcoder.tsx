@@ -19,13 +19,11 @@ import { Progress } from "@/components/ui/progress";
 
 interface AtcoderResultsDialogProps {
     eventId: bigint;
-    contestId: string;
     currentUser?: string;
 }
 
 export function AtcoderResultsDialog({
     eventId,
-    contestId,
     currentUser
 }: AtcoderResultsDialogProps) {
     const router = useRouter();
@@ -59,7 +57,7 @@ export function AtcoderResultsDialog({
         setTotalUsers(0);
 
         const eventSource = new EventSource(
-            `/api/events/${eventId}/atcoder-update?contestId=${encodeURIComponent(contestId)}`
+            `/api/events/${eventId}/atcoder-update`
         );
 
         const cleanup = () => {
@@ -111,7 +109,7 @@ export function AtcoderResultsDialog({
                 description: error instanceof Error ? error.message : String(error)
             });
         }
-    }, [eventId, contestId, router, results.length]);
+    }, [eventId, router, results.length]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

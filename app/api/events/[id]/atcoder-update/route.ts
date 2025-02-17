@@ -1,67 +1,200 @@
-import { processAtcoderResults } from "@/app/(public)/events/[id]/contest-result-updater/actions/atcoder";
-import { ProcessedUserResult } from "@/app/(public)/events/[id]/contest-result-updater/types/atcoder";
+import { cache } from "react";
 import { prisma } from "@/lib/prisma";
+import type {
+    AtcoderContest,
+    AtcoderSubmission,
+    ProcessedUserResult,
+} from "@/app/(public)/events/[id]/contest-result-updater/types/atcoder";
+
+const ATCODER_API = {
+    CONTESTS: "https://kenkoooo.com/atcoder/resources/contests.json",
+    SUBMISSIONS: "https://kenkoooo.com/atcoder/atcoder-api/v3/user/submissions",
+} as const;
+
+const fetchWithRetry = async (url: string, retries = 3): Promise<Response> => {
+    let lastError: Error | undefined;
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, { next: { revalidate: 0 } });
+            if (response.ok) return response;
+            lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+        } catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error));
+            if (i < retries - 1) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
+        }
+    }
+    throw lastError ?? new Error(`Failed to fetch ${url} after ${retries} retries`);
+};
+
+const getContests = cache(async (): Promise<AtcoderContest[]> => {
+    const response = await fetchWithRetry(ATCODER_API.CONTESTS);
+    return response.json();
+});
+
+const getSubmissions = cache(async (username: string, fromSecond: number): Promise<AtcoderSubmission[]> => {
+    const url = `${ATCODER_API.SUBMISSIONS}?user=${username}&from_second=${fromSecond}`;
+    const response = await fetchWithRetry(url);
+    return response.json();
+});
 
 export async function GET(
     request: Request,
-    context: { params: Promise<{ id: string }> }
+    context: { params: { id: string } }
 ) {
-    const { searchParams } = new URL(request.url);
-    const contestId = searchParams.get('contestId');
-    const params = await context.params;
-    const eventId = BigInt(params.id); // Convert to BigInt once at the start
-
-    if (!contestId) {
-        return new Response(
-            JSON.stringify({ type: 'error', error: 'Contest ID is required' }), 
-            { status: 400 }
-        );
-    }
-
+    const eventId = BigInt(context.params.id);
     const encoder = new TextEncoder();
+
     const stream = new ReadableStream({
         async start(controller) {
             try {
-                const results: ProcessedUserResult[] = [];
-                let processedUsers = 0;
-                let totalUsers = 0;
-                let firstResult = true;
+                // First, get the event to extract contest ID
+                const event = await prisma.event.findUnique({
+                    where: { id: eventId },
+                    select: { eventLink: true }
+                });
 
-                // Use the pre-converted eventId
-                for await (const result of processAtcoderResults(eventId, contestId)) {
-                    results.push(result);
-                    processedUsers++;
+                if (!event?.eventLink) {
+                    throw new Error("Event link not found");
+                }
 
-                    if (firstResult) {
-                        // Get total users on first result
-                        const users = await prisma.user.count({
-                            where: {
-                                atcoderHandle: { not: null },
-                                rankListUsers: {
-                                    some: {
-                                        rankList: {
-                                            eventRankLists: {
-                                                some: {
-                                                    event: { id: eventId } // Use pre-converted eventId
-                                                }
-                                            }
+                // Extract contest ID from event link
+                const contestIdMatch = event.eventLink.match(/contests\/([^/]+)/);
+                const contestId = contestIdMatch?.[1];
+
+                if (!contestId) {
+                    throw new Error("Invalid AtCoder contest URL");
+                }
+
+                // Get contest info
+                const contests = await getContests();
+                const contestInfo = contests.find(c => c.id === contestId);
+                
+                if (!contestInfo) {
+                    throw new Error("Contest not found in AtCoder API");
+                }
+
+                const users = await prisma.user.findMany({
+                    where: {
+                        atcoderHandle: { not: null },
+                        rankListUsers: {
+                            some: {
+                                rankList: {
+                                    eventRankLists: {
+                                        some: {
+                                            event: { id: eventId }
                                         }
                                     }
                                 }
                             }
-                        });
-                        totalUsers = users;
-                        firstResult = false;
+                        }
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        atcoderHandle: true
                     }
+                });
 
-                    // Send progress update
-                    const progressEvent = {
-                        type: 'progress',
-                        userResults: [result],
-                        totalUsers,
-                        processedUsers
-                    };
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(progressEvent)}\n\n`));
+                const results: ProcessedUserResult[] = [];
+                let processedUsers = 0;
+                const totalUsers = users.length;
+
+                for (const user of users) {
+                    if (!user.atcoderHandle) continue;
+
+                    try {
+                        const submissions = await getSubmissions(
+                            user.atcoderHandle,
+                            contestInfo.start_epoch_second
+                        );
+
+                        const contestEnd = contestInfo.start_epoch_second + contestInfo.duration_second;
+                        const solvedProblems = new Set<string>();
+                        const upsolvedProblems = new Set<string>();
+                        let isPresent = false;
+
+                        for (const sub of submissions) {
+                            if (sub.contest_id !== contestId) continue;
+
+                            const submissionTime = sub.epoch_second;
+                            
+                            if (submissionTime >= contestInfo.start_epoch_second && 
+                                submissionTime <= contestEnd) {
+                                isPresent = true;
+                                if (sub.result === "AC") {
+                                    solvedProblems.add(sub.problem_id);
+                                }
+                            } else if (submissionTime > contestEnd && 
+                                    sub.result === "AC" && 
+                                    !solvedProblems.has(sub.problem_id)) {
+                                upsolvedProblems.add(sub.problem_id);
+                            }
+                        }
+
+                        const result: ProcessedUserResult = {
+                            username: user.name,
+                            atcoderHandle: user.atcoderHandle,
+                            solveCount: solvedProblems.size,
+                            upsolveCount: upsolvedProblems.size,
+                            isPresent
+                        };
+
+                        results.push(result);
+                        processedUsers++;
+
+                        // Update database
+                        await prisma.solveStat.upsert({
+                            where: {
+                                userId_eventId: {
+                                    userId: user.id,
+                                    eventId
+                                }
+                            },
+                            create: {
+                                userId: user.id,
+                                eventId,
+                                solveCount: BigInt(solvedProblems.size),
+                                upsolveCount: BigInt(upsolvedProblems.size),
+                                isPresent
+                            },
+                            update: {
+                                solveCount: BigInt(solvedProblems.size),
+                                upsolveCount: BigInt(upsolvedProblems.size),
+                                isPresent
+                            }
+                        });
+
+                        // Send progress update
+                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                            type: 'progress',
+                            userResults: [result],
+                            totalUsers,
+                            processedUsers
+                        })}\n\n`));
+
+                    } catch (error) {
+                        const result: ProcessedUserResult = {
+                            username: user.name,
+                            atcoderHandle: user.atcoderHandle,
+                            solveCount: 0,
+                            upsolveCount: 0,
+                            isPresent: false,
+                            error: error instanceof Error ? error.message : String(error)
+                        };
+                        
+                        results.push(result);
+                        processedUsers++;
+
+                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                            type: 'progress',
+                            userResults: [result],
+                            totalUsers,
+                            processedUsers
+                        })}\n\n`));
+                    }
                 }
 
                 let totalSolved = 0;
@@ -75,7 +208,7 @@ export async function GET(
                 }
 
                 // Send completion event
-                const completeEvent = {
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({
                     type: 'complete',
                     totalStats: {
                         totalUsers: results.length,
@@ -83,15 +216,14 @@ export async function GET(
                         totalSolved,
                         totalUpsolved
                     }
-                };
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify(completeEvent)}\n\n`));
+                })}\n\n`));
+
                 controller.close();
             } catch (error) {
-                const errorEvent = {
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({
                     type: 'error',
                     error: error instanceof Error ? error.message : String(error)
-                };
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorEvent)}\n\n`));
+                })}\n\n`));
                 controller.close();
             }
         },
