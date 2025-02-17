@@ -4,6 +4,7 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AttendanceSection from "./AttendanceSection";
 import SolveStatsSection from "./SolveStatsSection";
+import RankListsSection from "./RankListsSection";
 import { cn } from "@/lib/utils";
 import { Event, SolveStat } from "@prisma/client";
 
@@ -22,6 +23,20 @@ interface EventWithRelations extends Event {
   solveStats: Array<SolveStat & {
     user: User;
   }>;
+  eventRankLists: Array<{
+    id: bigint;
+    weight: number;
+    rankList: {
+      id: bigint;
+      title: string;
+      session: string;
+      description: string | null;
+      weightOfUpsolve: number;
+      tracker: {
+        slug: string;
+      };
+    };
+  }>;
 }
 
 interface EventTabsProps {
@@ -30,7 +45,7 @@ interface EventTabsProps {
   currentUser: { id: string; name: string } | null;
   currentUserName?: string;
   userSolveStat: (SolveStat & { user: User }) | null;
-  defaultTab?: "attendance" | "solve-stats";
+  defaultTab?: "attendance" | "solve-stats" | "ranklists";
 }
 
 export default function EventTabs({
@@ -44,7 +59,7 @@ export default function EventTabs({
   return (
     <Tabs defaultValue={defaultTab} className="space-y-8">
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-2">
-        <TabsList className="grid w-full grid-cols-2 h-14 rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
+        <TabsList className="grid w-full grid-cols-3 h-14 rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
           {event.openForAttendance && (
             <TabsTrigger
               value="attendance"
@@ -71,6 +86,18 @@ export default function EventTabs({
           >
             Solve Stats
           </TabsTrigger>
+          <TabsTrigger
+            value="ranklists"
+            className={cn(
+              "rounded-lg text-base font-medium h-12",
+              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800",
+              "data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400",
+              "data-[state=active]:shadow-sm",
+              "transition-all duration-200"
+            )}
+          >
+            Ranklists
+          </TabsTrigger>
         </TabsList>
       </div>
 
@@ -90,6 +117,10 @@ export default function EventTabs({
           userSolveStat={userSolveStat}
           currentUserName={currentUserName}
         />
+      </TabsContent>
+
+      <TabsContent value="ranklists" className="mt-6">
+        <RankListsSection eventRankLists={event.eventRankLists} />
       </TabsContent>
     </Tabs>
   );

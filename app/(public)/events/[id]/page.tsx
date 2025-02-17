@@ -35,6 +35,20 @@ interface SolveStatWithUser extends SolveStat {
 interface EventWithRelations extends Event {
   eventUsers: EventUser[];
   solveStats: SolveStatWithUser[];
+  eventRankLists: Array<{
+    id: bigint;
+    weight: number;
+    rankList: {
+      id: bigint;
+      title: string;
+      session: string;
+      description: string | null;
+      weightOfUpsolve: number;
+      tracker: {
+        slug: string;
+      };
+    };
+  }>;
 }
 
 interface CurrentUser {
@@ -68,6 +82,24 @@ async function getEvent(id: string): Promise<EventWithRelations> {
               username: true,
               studentId: true,
               image: true,
+            },
+          },
+        },
+      },
+      eventRankLists: {
+        include: {
+          rankList: {
+            select: {
+              id: true,
+              title: true,
+              session: true,
+              description: true,
+              weightOfUpsolve: true,
+              tracker: {
+                select: {
+                  slug: true,
+                }
+              }
             },
           },
         },
