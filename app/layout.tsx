@@ -36,7 +36,7 @@ export default function RootLayout({
                 >
                     <SessionProvider>
                         <Navbar />
-                        <main className="pt-16">
+                        <main>
                             {children}
                         </main>
                         <Toaster />

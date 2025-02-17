@@ -17,7 +17,6 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const lastScrollTop = useRef(0);
 
   const getSolveData = (userId: string, eventId: bigint): UserSolveData | null => {
     const user = data.users.find(u => u.user.id === userId);
@@ -53,16 +52,8 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
     if (!container) return;
 
     const handleScroll = () => {
-      const scrollTop = container.scrollTop;
       setIsScrolled(container.scrollLeft > 50);
-      
-      // Hide header when scrolling down, show when scrolling up
-      if (scrollTop > lastScrollTop.current && scrollTop > 100) {
-        setIsHeaderVisible(false);
-      } else {
-        setIsHeaderVisible(true);
-      }
-      lastScrollTop.current = scrollTop;
+      setIsHeaderVisible(container.scrollTop <= 100);
     };
 
     container.addEventListener('scroll', handleScroll);
@@ -74,9 +65,8 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
       {/* Modified Header */}
       <div className={cn(
         "bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700",
-        "transition-all duration-300 ease-in-out",
         "sticky top-0 z-50",
-        isHeaderVisible ? "h-16 opacity-100" : "h-0 opacity-0 overflow-hidden"
+        isHeaderVisible ? "h-16" : "hidden"
       )}>
         <div className="h-16 flex items-center px-6">
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white truncate">
@@ -94,7 +84,6 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
                 {/* User column header - Modified width transition */}
                 <th className={cn(
                   "sticky left-0 z-40 bg-white dark:bg-gray-800 px-4 py-4 border-b border-r border-gray-200 dark:border-gray-700",
-                  "transition-all duration-200",
                   isScrolled ? "w-[60px]" : "w-[200px]"
                 )}>
                   <div className="font-medium text-sm text-gray-900 dark:text-white md:block hidden">
@@ -104,7 +93,6 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
                 {/* Points column header - Modified position */}
                 <th className={cn(
                   "sticky z-40 bg-white dark:bg-gray-800 px-4 py-4 border-b border-r border-gray-200 dark:border-gray-700 w-[80px]",
-                  "transition-all duration-200",
                   isScrolled ? "left-[60px]" : "left-[200px]"
                 )}>
                   <div className="font-medium text-sm text-gray-900 dark:text-white">
@@ -136,14 +124,13 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
                   {/* User info cell - Modified for proper collapse */}
                   <td className={cn(
                     "sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-3 border-b border-r border-gray-200 dark:border-gray-700",
-                    "transition-all duration-200",
                     isScrolled ? "w-[60px]" : "w-[200px]"
                   )}>
                     <Link href={`/users/${user.user.username}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                       <UserAvatar user={user.user} className="w-8 h-8 shrink-0" />
                       <div className={cn(
-                        "min-w-0 overflow-hidden transition-all duration-200",
-                        isScrolled ? "w-0 opacity-0" : "w-[120px] opacity-100"
+                        "min-w-0 overflow-hidden",
+                        isScrolled ? "hidden" : "block"
                       )}>
                         <div className="font-medium text-gray-900 dark:text-white truncate">
                           {formatName(user.user.name)}
@@ -158,7 +145,6 @@ export default function GridViewClient({ data, title }: GridViewClientProps) {
                   {/* Score cell - Modified position */}
                   <td className={cn(
                     "sticky z-20 bg-white dark:bg-gray-900 px-4 py-3 border-b border-r border-gray-200 dark:border-gray-700",
-                    "transition-all duration-200",
                     isScrolled ? "left-[60px]" : "left-[200px]"
                   )}>
                     <div className="font-mono font-medium text-blue-600 dark:text-blue-400">
