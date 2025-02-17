@@ -47,7 +47,7 @@ export default function RankListsSection({ eventRankLists }: RankListsSectionPro
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <Link 
-                      href={`/tracker/${rankList.tracker.slug}/${rankList.id}`}
+                      href={`/trackers/${rankList.tracker.slug}/${rankList.id}`}
                       className="group inline-block"
                     >
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
