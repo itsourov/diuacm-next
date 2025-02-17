@@ -1,4 +1,3 @@
-// app/(public)/events/[id]/components/EventTabs.tsx
 "use client";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -56,10 +55,22 @@ export default function EventTabs({
   userSolveStat,
   defaultTab = "solve-stats",
 }: EventTabsProps) {
+  // Set default tab based on event type and attendance status
+  const effectiveDefaultTab = event.type === 'contest' 
+    ? defaultTab 
+    : (event.openForAttendance ? "attendance" : "solve-stats");
+
   return (
-    <Tabs defaultValue={defaultTab} className="space-y-8">
+    <Tabs defaultValue={effectiveDefaultTab} className="space-y-8">
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-2">
-        <TabsList className="grid w-full grid-cols-3 h-14 rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
+        <TabsList 
+          className={cn(
+            "grid w-full h-14 rounded-xl bg-gray-100 dark:bg-gray-900 p-1",
+            event.type === 'contest' 
+              ? "grid-cols-3" 
+              : (event.openForAttendance ? "grid-cols-1" : "hidden")
+          )}
+        >
           {event.openForAttendance && (
             <TabsTrigger
               value="attendance"
@@ -74,30 +85,35 @@ export default function EventTabs({
               Attendance
             </TabsTrigger>
           )}
-          <TabsTrigger
-            value="solve-stats"
-            className={cn(
-              "rounded-lg text-base font-medium h-12",
-              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800",
-              "data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400",
-              "data-[state=active]:shadow-sm",
-              "transition-all duration-200"
-            )}
-          >
-            Solve Stats
-          </TabsTrigger>
-          <TabsTrigger
-            value="ranklists"
-            className={cn(
-              "rounded-lg text-base font-medium h-12",
-              "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800",
-              "data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400",
-              "data-[state=active]:shadow-sm",
-              "transition-all duration-200"
-            )}
-          >
-            Ranklists
-          </TabsTrigger>
+          
+          {event.type === 'contest' && (
+            <>
+              <TabsTrigger
+                value="solve-stats"
+                className={cn(
+                  "rounded-lg text-base font-medium h-12",
+                  "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800",
+                  "data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400",
+                  "data-[state=active]:shadow-sm",
+                  "transition-all duration-200"
+                )}
+              >
+                Solve Stats
+              </TabsTrigger>
+              <TabsTrigger
+                value="ranklists"
+                className={cn(
+                  "rounded-lg text-base font-medium h-12",
+                  "data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800",
+                  "data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400",
+                  "data-[state=active]:shadow-sm",
+                  "transition-all duration-200"
+                )}
+              >
+                Ranklists
+              </TabsTrigger>
+            </>
+          )}
         </TabsList>
       </div>
 
@@ -111,17 +127,21 @@ export default function EventTabs({
         </TabsContent>
       )}
 
-      <TabsContent value="solve-stats" className="mt-6">
-        <SolveStatsSection
-          solveStats={event.solveStats}
-          userSolveStat={userSolveStat}
-          currentUserName={currentUserName}
-        />
-      </TabsContent>
+      {event.type === 'contest' && (
+        <>
+          <TabsContent value="solve-stats" className="mt-6">
+            <SolveStatsSection
+              solveStats={event.solveStats}
+              userSolveStat={userSolveStat}
+              currentUserName={currentUserName}
+            />
+          </TabsContent>
 
-      <TabsContent value="ranklists" className="mt-6">
-        <RankListsSection eventRankLists={event.eventRankLists} />
-      </TabsContent>
+          <TabsContent value="ranklists" className="mt-6">
+            <RankListsSection eventRankLists={event.eventRankLists} />
+          </TabsContent>
+        </>
+      )}
     </Tabs>
   );
 }
