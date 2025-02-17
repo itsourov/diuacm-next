@@ -1,12 +1,15 @@
 import { processAtcoderResults } from "@/app/(public)/events/[id]/contest-result-updater/actions/atcoder";
 import { ProcessedUserResult } from "@/app/(public)/events/[id]/contest-result-updater/types/atcoder";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     const { searchParams } = new URL(request.url);
     const contestId = searchParams.get('contestId');
+    const params = await context.params;
+    const eventId = BigInt(params.id); // Convert to BigInt once at the start
 
     if (!contestId) {
         return new Response(
@@ -24,7 +27,8 @@ export async function GET(
                 let totalUsers = 0;
                 let firstResult = true;
 
-                for await (const result of processAtcoderResults(BigInt(params.id), contestId)) {
+                // Use the pre-converted eventId
+                for await (const result of processAtcoderResults(eventId, contestId)) {
                     results.push(result);
                     processedUsers++;
 
@@ -38,7 +42,7 @@ export async function GET(
                                         rankList: {
                                             eventRankLists: {
                                                 some: {
-                                                    event: { id: BigInt(params.id) }
+                                                    event: { id: eventId } // Use pre-converted eventId
                                                 }
                                             }
                                         }
