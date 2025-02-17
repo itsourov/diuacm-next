@@ -1,7 +1,7 @@
 "use client";
 
 // Remove unused imports
-import { GridViewData, UserSolveData } from "../types-grid";
+import { GridViewData } from "../types-grid";
 import UserAvatar from "@/components/UserAvatar";
 import { formatName, formatUsername, truncateText } from "../utils/format";
 import Link from "next/link";

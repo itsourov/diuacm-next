@@ -4,18 +4,21 @@ import GridViewClient from "./GridViewClient";
 import { Metadata } from "next";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     tracker_slug: string;
     ranklist_id: string;
-  };
+  }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  
   const tracker = await prisma.tracker.findFirst({
-    where: { slug: params.tracker_slug },
+    where: { slug: resolvedParams.tracker_slug },
     include: {
       rankLists: {
-        where: { id: BigInt(params.ranklist_id) },
+        where: { id: BigInt(resolvedParams.ranklist_id) },
       },
     },
   });
@@ -27,9 +30,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function GridPage({ params }: PageProps) {
+export default async function GridPage({ params, searchParams }: PageProps) {
+  const [resolvedParams,] = await Promise.all([
+    params,
+    searchParams
+  ]);
+  
   const rankList = await prisma.rankList.findUnique({
-    where: { id: BigInt(params.ranklist_id) },
+    where: { id: BigInt(resolvedParams.ranklist_id) },
     include: {
       eventRankLists: {
         include: {
