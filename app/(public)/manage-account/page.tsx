@@ -1,9 +1,14 @@
 // app/manage-account/page.tsx
-import {redirect} from 'next/navigation';
-import {auth} from '@/lib/auth';
-import {prisma} from '@/lib/prisma';
+import { redirect } from 'next/navigation';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import AccountTabs from './components/AccountTabs';
+import { Metadata } from 'next';
 
+export const metadata: Metadata = {
+    title: 'Manage Account | DIU ACM',
+    description: 'Manage your DIU ACM profile, update your personal information, competitive programming handles, and account settings.',
+};
 
 export default async function ManageAccountPage() {
     const session = await auth();
@@ -12,7 +17,7 @@ export default async function ManageAccountPage() {
     }
 
     const user = await prisma.user.findUnique({
-        where: {id: session.user.id}
+        where: { id: session.user.id }
     });
 
     if (!user) {
@@ -38,7 +43,7 @@ export default async function ManageAccountPage() {
             {/* Main Content */}
             <section className="py-12">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <AccountTabs user={user}/>
+                    <AccountTabs user={user} />
                 </div>
             </section>
         </div>

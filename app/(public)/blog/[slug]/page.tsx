@@ -2,9 +2,32 @@ import { getBlogPost, getBlogMeta } from "../utils/mdx";
 import { notFound } from "next/navigation";
 import BlogContent from "../components/BlogContent";
 import { Calendar, Clock } from "lucide-react";
+import { Metadata } from "next";
 
 interface BlogPostPageProps {
-  params: Promise<{ slug: string }>;  // Changed to Promise
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const post = getBlogPost(resolvedParams.slug);
+  if (!post) return {};
+
+  return {
+    title: `${post.title} | DIU ACM Blog`,
+    description: post.description,
+    keywords: [...post.tags, 'DIU ACM', 'programming blog', 'competitive programming'],
+    authors: [{ name: post.author.name }],
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      images: [post.featuredImage],
+      type: 'article',
+      publishedTime: post.date,
+      authors: [post.author.name],
+      tags: post.tags,
+    },
+  };
 }
 
 export async function generateStaticParams() {
@@ -15,7 +38,7 @@ export async function generateStaticParams() {
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const resolvedParams = await params;  // Await params here
+  const resolvedParams = await params;
   const post = getBlogPost(resolvedParams.slug);
   if (!post) notFound();
 
