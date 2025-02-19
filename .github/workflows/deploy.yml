@@ -10,30 +10,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # - name: Checkout code
-    #   uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    # - name: Set up Node.js
-    #   uses: actions/setup-node@v2
-    #   with:
-    #     node-version: '22'
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20"
 
-    # - name: Install dependencies
-    #   run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    # - name: Build Next.js app
-    #   run: npm run build
+      - name: Build Next.js app
+        run: npm run build
 
-    - name: Deploy via SSH
-      uses: appleboy/ssh-action@v0.1.5
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        port: ${{ secrets.SSH_PORT }}
-        script: |
-          cd nextjs/diuacm
-          git pull origin main
-          npm install
-          npm run build
-          pm2 restart diuacm
+      - name: Create build artifact
+        run: |
+          tar -czvf build_artifact.tar.gz .next next.config.js
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: nextjs-build
+          path: build_artifact.tar.gz
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd nextjs/diuacm
+            git pull origin main
+            npm install
+
+            # Download the build artifact
+            wget https://github.com/${{ github.repository }}/suites/${{ github.run_id }}/artifacts/0/zip -O artifact.zip
+            unzip artifact.zip
+            tar -xzvf build_artifact.tar.gz -C .
+
+            pm2 restart diuacm
