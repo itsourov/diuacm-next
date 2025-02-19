@@ -26,7 +26,7 @@ jobs:
 
       - name: Create build artifact
         run: |
-          tar -czvf build_artifact.tar.gz .next next.config.js
+          tar -czvf build_artifact.tar.gz .next next.config.ts
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4 # Updated to v4
