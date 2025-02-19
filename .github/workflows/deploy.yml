@@ -24,15 +24,15 @@ jobs:
       - name: Build Next.js app
         run: npm run build
 
-      - name: Create build artifact
-        run: |
-          tar -czvf build_artifact.tar.gz .next next.config.ts
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4 # Updated to v4
+      - name: Copy build files via SCP
+        uses: appleboy/scp-action@master
         with:
-          name: nextjs-build
-          path: build_artifact.tar.gz
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: ".next,package.json,package-lock.json,public"
+          target: "nextjs/diuacm"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.5
@@ -43,13 +43,5 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd nextjs/diuacm
-            git pull origin main
-            npm install
-
-            # Download the build artifact
-            wget https://github.com/${{ github.repository }}/suites/${{ github.run_id }}/artifacts/0/zip -O artifact.zip
-            unzip artifact.zip
-            tar -xzvf build_artifact.tar.gz -C .
-
-
+            npm install --production
             pm2 restart diuacm
