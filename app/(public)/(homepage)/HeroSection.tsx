@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const HeroSection = () => {
   const currentTime = "2025-01-31 15:55:49";
-  const currentUser = "sourov";
+  const currentUser = "itsourov";
 
   return (
     <div className="relative min-h-[calc(100vh-64px)] bg-white dark:bg-gray-900 flex items-center py-8">
