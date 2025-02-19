@@ -47,13 +47,9 @@ jobs:
             npm install
 
             # Download the build artifact
-            #wget https://github.com/${{ github.repository }}/suites/${{ github.run_id }}/artifacts/0/zip -O artifact.zip
-            #unzip artifact.zip
-            #tar -xzvf build_artifact.tar.gz -C .
-
-            #Using the github cli to download the artifact
-            gh workflow run artifact download --name nextjs-build
-
+            wget https://github.com/${{ github.repository }}/suites/${{ github.run_id }}/artifacts/0/zip -O artifact.zip
+            unzip artifact.zip
             tar -xzvf build_artifact.tar.gz -C .
+
 
             pm2 restart diuacm
