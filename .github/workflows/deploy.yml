@@ -29,7 +29,7 @@ jobs:
           tar -czvf build_artifact.tar.gz .next next.config.js
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3 # Updated to v3
         with:
           name: nextjs-build
           path: build_artifact.tar.gz
