@@ -29,7 +29,7 @@ jobs:
           tar -czvf build_artifact.tar.gz .next next.config.js
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v3 # Updated to v3
+        uses: actions/upload-artifact@v4 # Updated to v4
         with:
           name: nextjs-build
           path: build_artifact.tar.gz
@@ -47,8 +47,13 @@ jobs:
             npm install
 
             # Download the build artifact
-            wget https://github.com/${{ github.repository }}/suites/${{ github.run_id }}/artifacts/0/zip -O artifact.zip
-            unzip artifact.zip
+            #wget https://github.com/${{ github.repository }}/suites/${{ github.run_id }}/artifacts/0/zip -O artifact.zip
+            #unzip artifact.zip
+            #tar -xzvf build_artifact.tar.gz -C .
+
+            #Using the github cli to download the artifact
+            gh workflow run artifact download --name nextjs-build
+
             tar -xzvf build_artifact.tar.gz -C .
 
             pm2 restart diuacm
