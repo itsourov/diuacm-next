@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { recalculateRankListScores } from '@/app/(public)/trackers/[tracker_slug]/[ranklist_id]/actions';
 import type {
     VjudgeContestData,
     ProcessedContestData,
@@ -260,6 +261,12 @@ export async function updateVjudgeResults({
                 }
             );
         }
+
+        // Recalculate scores for all associated ranklists
+        const recalculationPromises = event.eventRankLists.map(erl =>
+            recalculateRankListScores(erl.rankListId.toString())
+        );
+        await Promise.all(recalculationPromises);
 
         log("Update completed successfully");
         revalidatePath(`/events/${eventId}`);
