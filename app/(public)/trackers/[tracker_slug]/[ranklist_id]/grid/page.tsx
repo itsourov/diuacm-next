@@ -11,9 +11,11 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  
+
   const tracker = await prisma.tracker.findFirst({
     where: { slug: resolvedParams.tracker_slug },
     include: {
@@ -31,17 +33,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function GridPage({ params, searchParams }: PageProps) {
-  const [resolvedParams,] = await Promise.all([
-    params,
-    searchParams
-  ]);
-  
+  const [resolvedParams] = await Promise.all([params, searchParams]);
+
   const rankList = await prisma.rankList.findUnique({
     where: { id: BigInt(resolvedParams.ranklist_id) },
     include: {
       eventRankLists: {
         include: {
           event: true,
+        },
+        orderBy: {
+          event: {
+            startingAt: "desc",
+          },
         },
       },
       rankListUsers: {
@@ -63,10 +67,10 @@ export default async function GridPage({ params, searchParams }: PageProps) {
   if (!rankList) notFound();
 
   // Get all event IDs
-  const eventIds = rankList.eventRankLists.map(erl => erl.eventId);
-  
+  const eventIds = rankList.eventRankLists.map((erl) => erl.eventId);
+
   // Get all user IDs
-  const userIds = rankList.rankListUsers.map(rlu => rlu.userId);
+  const userIds = rankList.rankListUsers.map((rlu) => rlu.userId);
 
   // Get solve stats for all users and events
   const solveStats = await prisma.solveStat.findMany({
@@ -79,25 +83,27 @@ export default async function GridPage({ params, searchParams }: PageProps) {
       eventId: true,
       solveCount: true,
       upsolveCount: true,
-      isPresent: true,  // Add this field
+      isPresent: true, // Add this field
     },
   });
 
   // Create grid data
   const gridData = {
-    events: rankList.eventRankLists.map(erl => ({
+    events: rankList.eventRankLists.map((erl) => ({
       ...erl.event,
       weight: erl.weight,
     })),
-    users: rankList.rankListUsers.map(user => ({
+    users: rankList.rankListUsers.map((user) => ({
       ...user,
-      solveStats: solveStats.filter(stat => stat.userId === user.userId),
+      solveStats: solveStats.filter((stat) => stat.userId === user.userId),
     })),
     weightOfUpsolve: rankList.weightOfUpsolve,
   };
 
-  return <GridViewClient 
-    data={gridData} 
-    title={rankList.title} // Pass the title
-  />;
+  return (
+    <GridViewClient
+      data={gridData}
+      title={rankList.title} // Pass the title
+    />
+  );
 }
