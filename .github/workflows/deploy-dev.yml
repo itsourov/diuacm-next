@@ -44,4 +44,4 @@ jobs:
           script: |
             cd nextjs/diuacm-dev
             npm install --production
-            # pm2 restart diuacm-dev
+            pm2 restart diuacm-dev
