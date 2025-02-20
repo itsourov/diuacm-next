@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
+import { recalculateRankListScores } from "@/app/(public)/trackers/[tracker_slug]/[ranklist_id]/actions";
 import type {
     AtcoderContest,
     AtcoderSubmission,
@@ -206,6 +207,16 @@ export async function GET(
                     totalSolved += result.solveCount;
                     totalUpsolved += result.upsolveCount;
                     if (result.isPresent) presentUsers++;
+                }
+
+                // Recalculate scores for all associated ranklists
+                const eventRankLists = await prisma.eventRankList.findMany({
+                    where: { eventId },
+                    select: { rankListId: true }
+                });
+
+                for (const { rankListId } of eventRankLists) {
+                    await recalculateRankListScores(rankListId.toString());
                 }
 
                 // Send completion event
