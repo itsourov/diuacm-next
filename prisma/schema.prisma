@@ -52,6 +52,7 @@ model RankList {
   session         String    @db.VarChar(255)
   description     String?   @db.VarChar(255)
   weightOfUpsolve Float     @default(0.25) @map("weight_of_upsolve")
+  isArchived      Boolean   @default(false) @map("is_archived")
   createdAt       DateTime? @map("created_at")
   updatedAt       DateTime? @map("updated_at")
 
@@ -64,12 +65,13 @@ model RankList {
 }
 
 model EventRankList {
-  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  eventId    BigInt    @map("event_id") @db.UnsignedBigInt
-  rankListId BigInt    @map("rank_list_id") @db.UnsignedBigInt
-  weight     Float     @default(1)
-  createdAt  DateTime? @map("created_at")
-  updatedAt  DateTime? @map("updated_at")
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  eventId          BigInt    @map("event_id") @db.UnsignedBigInt
+  rankListId       BigInt    @map("rank_list_id") @db.UnsignedBigInt
+  weight           Float     @default(1)
+  strictAttendance Boolean   @default(false) @map("strict_attendance")
+  createdAt        DateTime? @map("created_at")
+  updatedAt        DateTime? @map("updated_at")
 
   event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   rankList RankList @relation(fields: [rankListId], references: [id], onDelete: Cascade)
