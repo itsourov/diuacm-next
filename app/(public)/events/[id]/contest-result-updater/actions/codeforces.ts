@@ -9,6 +9,7 @@ import type {
     ProcessedResult,
     UpdateResultsResponse,
 } from "../types/codeforces";
+import { recalculateRankListScores } from "@/app/(public)/trackers/[tracker_slug]/[ranklist_id]/actions";
 
 const CODEFORCES_API = {
     BASE_URL: "https://codeforces.com/api",
@@ -235,6 +236,13 @@ export async function updateCodeforcesResults(
                     });
                 }));
             });
+
+            // Recalculate scores for all associated ranklists
+            await Promise.all(
+                event.eventRankLists.map(async (erl) => {
+                    await recalculateRankListScores(erl.rankListId.toString());
+                })
+            );
 
             revalidatePath(`/events/${eventId}`);
             return { success: true, data: processedResults };
