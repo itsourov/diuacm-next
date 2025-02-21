@@ -211,6 +211,7 @@ enum AttendanceScope {
   open_for_all       @map("open_for_all")
   only_girls         @map("only_girls")
   junior_programmers @map("junior_programmers")
+  selected_persons   @map("selected_persons")
 }
 
 enum Gender {
