@@ -136,8 +136,7 @@ function processUserResults(
 }
 
 export async function updateCodeforcesResults(
-    eventId: bigint,
-    singleUserId?: string
+    eventId: bigint
 ): Promise<UpdateResultsResponse> {
     try {
         const event = await prisma.event.findUnique({
@@ -169,7 +168,6 @@ export async function updateCodeforcesResults(
             return { success: false, error: "Event link not found" };
         }
 
-        // Extract contest ID from event link
         const contestIdMatch = event.eventLink.match(/contests\/(\d+)/);
         const contestId = contestIdMatch?.[1];
 
@@ -191,17 +189,9 @@ export async function updateCodeforcesResults(
             return { success: false, error: "No users with Codeforces handles found" };
         }
 
-        let filteredUsers = users;
-        if (singleUserId) {
-            filteredUsers = users.filter(user => user.id === singleUserId);
-            if (filteredUsers.length === 0) {
-                return { success: false, error: "User not found or no Codeforces handle set" };
-            }
-        }
-
         const standingsResult = await getContestStandings(
             contestId,
-            filteredUsers.map(u => u.codeforcesHandle)
+            users.map(u => u.codeforcesHandle)
         );
 
         if (!standingsResult.success || !standingsResult.data) {
@@ -210,7 +200,7 @@ export async function updateCodeforcesResults(
 
         const processedResults: Record<string, ProcessedResult> = {};
 
-        filteredUsers.forEach(user => {
+        users.forEach(user => {
             processedResults[user.codeforcesHandle] = processUserResults(
                 user.codeforcesHandle,
                 standingsResult.data!
@@ -223,7 +213,7 @@ export async function updateCodeforcesResults(
                     where: { eventId }
                 });
 
-                await Promise.all(filteredUsers.map(user => {
+                await Promise.all(users.map(user => {
                     const stats = processedResults[user.codeforcesHandle];
                     return tx.solveStat.create({
                         data: {
@@ -237,7 +227,6 @@ export async function updateCodeforcesResults(
                 }));
             });
 
-            // Recalculate scores for all associated ranklists
             await Promise.all(
                 event.eventRankLists.map(async (erl) => {
                     await recalculateRankListScores(erl.rankListId.toString());

@@ -13,7 +13,7 @@ import { CodeforcesResultsDialog } from "./contest-result-updater/codeforces";
 import { AtcoderResultsDialog } from "./contest-result-updater/atcoder";
 
 interface EventPageProps {
-  params: Promise<{ id: string }>;  // Changed to Promise
+  params: Promise<{ id: string }>; // Changed to Promise
 }
 
 interface User {
@@ -98,8 +98,8 @@ async function getEvent(id: string): Promise<EventWithRelations> {
               tracker: {
                 select: {
                   slug: true,
-                }
-              }
+                },
+              },
             },
           },
         },
@@ -139,12 +139,14 @@ function calculateInitialTimeLeft(startTime: Date, endTime: Date) {
       minutes: Math.floor((difference / 1000 / 60) % 60),
       seconds: Math.floor((difference / 1000) % 60),
     },
-    status
+    status,
   };
 }
 
-export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
-  const resolvedParams = await params;  // Await params here
+export async function generateMetadata({
+  params,
+}: EventPageProps): Promise<Metadata> {
+  const resolvedParams = await params; // Await params here
   const event = await getEvent(resolvedParams.id);
 
   return {
@@ -154,7 +156,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
 }
 
 export default async function EventPage({ params }: EventPageProps) {
-  const resolvedParams = await params;  // Await params here
+  const resolvedParams = await params; // Await params here
   const [event, session] = await Promise.all([
     getEvent(resolvedParams.id),
     auth(),
@@ -163,9 +165,9 @@ export default async function EventPage({ params }: EventPageProps) {
   const currentUser: CurrentUser | null =
     session?.user?.id && session.user.name
       ? {
-        id: session.user.id,
-        name: session.user.name,
-      }
+          id: session.user.id,
+          name: session.user.name,
+        }
       : null;
 
   const hasAttendance = currentUser
@@ -176,10 +178,11 @@ export default async function EventPage({ params }: EventPageProps) {
     ? event.solveStats.find((ss) => ss.user.id === currentUser.id) || null
     : null;
 
-  const { timeLeft: initialTimeLeft, status: initialStatus } = calculateInitialTimeLeft(
-    new Date(event.startingAt),
-    new Date(event.endingAt)
-  );
+  const { timeLeft: initialTimeLeft, status: initialStatus } =
+    calculateInitialTimeLeft(
+      new Date(event.startingAt),
+      new Date(event.endingAt)
+    );
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -192,7 +195,7 @@ export default async function EventPage({ params }: EventPageProps) {
           type: event.type,
           startingAt: new Date(event.startingAt),
           endingAt: new Date(event.endingAt),
-          eventLink: event.eventLink,  // Add this line
+          eventLink: event.eventLink, // Add this line
         }}
         attendeeCount={event.eventUsers.length}
       />
@@ -202,27 +205,29 @@ export default async function EventPage({ params }: EventPageProps) {
         <div className="space-y-8">
           {/* Added: Action buttons section */}
           <div className="flex justify-end gap-4">
-            {event.type === 'contest' && event.eventLink?.includes('vjudge.net') && (
-              <VjudgeResultsDialog
-                eventId={event.id}
-                currentUser={session?.user?.name ?? 'guest'}
-              />
-            )}
+            {event.type === "contest" &&
+              event.eventLink?.includes("vjudge.net") && (
+                <VjudgeResultsDialog
+                  eventId={event.id}
+                  currentUser={session?.user?.name ?? "guest"}
+                />
+              )}
 
-            {event.type === 'contest' && event.eventLink?.includes('codeforces.com') && (
-              <CodeforcesResultsDialog
-                eventId={event.id}
-                currentUser={session?.user?.name ?? 'guest'}
-                userId={session?.user?.id}
-              />
-            )}
+            {event.type === "contest" &&
+              event.eventLink?.includes("codeforces.com") && (
+                <CodeforcesResultsDialog
+                  eventId={event.id}
+                  currentUser={session?.user?.name ?? "guest"}
+                />
+              )}
 
-            {event.type === 'contest' && event.eventLink?.includes('atcoder.jp') && (
-              <AtcoderResultsDialog
-                eventId={event.id}
-                currentUser={session?.user?.name ?? 'guest'}
-              />
-            )}
+            {event.type === "contest" &&
+              event.eventLink?.includes("atcoder.jp") && (
+                <AtcoderResultsDialog
+                  eventId={event.id}
+                  currentUser={session?.user?.name ?? "guest"}
+                />
+              )}
           </div>
 
           {/* Countdown Section - Only show if event hasn't ended */}
@@ -249,4 +254,3 @@ export default async function EventPage({ params }: EventPageProps) {
     </div>
   );
 }
-
