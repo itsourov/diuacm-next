@@ -151,7 +151,7 @@ export async function generateMetadata({
 
   return {
     title: event.title,
-    description: event.description || `Event details for ${event.title}`,
+    description: event.description?.replace(/(<([^>]+)>)/gi, '') || `Event details for ${event.title}`,
   };
 }
 
