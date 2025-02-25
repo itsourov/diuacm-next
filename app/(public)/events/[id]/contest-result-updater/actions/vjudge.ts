@@ -130,6 +130,12 @@ export async function updateVjudgeResults({
             where: { id: eventId },
             select: {
                 eventLink: true,
+                strictAttendance: true,
+                eventUsers: {
+                    select: {
+                        userId: true
+                    }
+                },
                 eventRankLists: {
                     include: {
                         rankList: {
@@ -236,6 +242,11 @@ export async function updateVjudgeResults({
             where: { eventId: BigInt(eventId) }
         });
 
+        // Create a Set of participating user IDs for quick lookup
+        const participatingUserIds = new Set(
+            event.strictAttendance ? event.eventUsers.map(eu => eu.userId) : []
+        );
+
         // Process users in chunks of 10
         const userChunks = chunkArray(users, 10);
 
@@ -244,14 +255,26 @@ export async function updateVjudgeResults({
                 async (tx) => {
                     await Promise.all(chunk.map(user => {
                         const stats = user.vjudgeHandle ? processedData[user.vjudgeHandle] : null;
+                        
+                        let finalSolveCount = BigInt(stats?.solveCount ?? 0);
+                        let finalUpsolveCount = BigInt(stats?.upSolveCount ?? 0);
+                        
+                        // If strict attendance is enabled and user is not in eventUsers
+                        if (event.strictAttendance && !participatingUserIds.has(user.id)) {
+                            finalUpsolveCount += finalSolveCount; // Move solves to upsolves
+                            finalSolveCount = BigInt(0);
+                        }
 
                         return tx.solveStat.create({
                             data: {
                                 userId: user.id,
                                 eventId: BigInt(eventId),
-                                solveCount: BigInt(stats?.solveCount ?? 0),
-                                upsolveCount: BigInt(stats?.upSolveCount ?? 0),
-                                isPresent: !(stats?.absent ?? true),
+                                solveCount: finalSolveCount,
+                                upsolveCount: finalUpsolveCount,
+                                // Mark as absent if strict attendance is enabled and user not in eventUsers
+                                isPresent: event.strictAttendance ? 
+                                    participatingUserIds.has(user.id) : 
+                                    !(stats?.absent ?? true),
                             }
                         });
                     }));

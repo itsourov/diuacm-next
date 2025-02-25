@@ -17,6 +17,7 @@ model Event {
   eventLink         String?         @unique @map("event_link") @db.VarChar(255)
   eventPassword     String?         @map("event_password") @db.VarChar(255)
   openForAttendance Boolean         @map("open_for_attendance")
+  strictAttendance  Boolean         @default(false) @map("strict_attendance")
   type              EventType       @default(contest)
   attendanceScope   AttendanceScope @default(open_for_all) @map("attendance_scope")
   createdAt         DateTime?       @map("created_at")
@@ -65,13 +66,12 @@ model RankList {
 }
 
 model EventRankList {
-  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  eventId          BigInt    @map("event_id") @db.UnsignedBigInt
-  rankListId       BigInt    @map("rank_list_id") @db.UnsignedBigInt
-  weight           Float     @default(1)
-  strictAttendance Boolean   @default(false) @map("strict_attendance")
-  createdAt        DateTime? @map("created_at")
-  updatedAt        DateTime? @map("updated_at")
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  eventId    BigInt    @map("event_id") @db.UnsignedBigInt
+  rankListId BigInt    @map("rank_list_id") @db.UnsignedBigInt
+  weight     Float     @default(1)
+  createdAt  DateTime? @map("created_at")
+  updatedAt  DateTime? @map("updated_at")
 
   event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   rankList RankList @relation(fields: [rankListId], references: [id], onDelete: Cascade)
