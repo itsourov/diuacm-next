@@ -23,8 +23,7 @@ type PageProps = {
     }>
 }
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 60; // revalidate every 60 seconds
+
 
 export default async function EventsPage({ searchParams }: PageProps) {
     // Await the searchParams before using them
