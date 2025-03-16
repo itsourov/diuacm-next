@@ -108,6 +108,8 @@ export async function validateVjudgeSession(sessionId: string): Promise<Validate
         }
         const data = await response.json();
         if (!data.username) {
+            console.error(response);
+            console.error(data);
             return { success: false, error: "Invalid session" };
         }
 
