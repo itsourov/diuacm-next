@@ -8,7 +8,7 @@ import EventTabs from "./components/EventTabs";
 import { Metadata } from "next";
 import { DateTime } from "@/lib/utils/datetime";
 import { Event, SolveStat } from "@prisma/client";
-import { VjudgeResultsDialog } from "./contest-result-updater/vjudge";
+// import { VjudgeResultsDialog } from "./contest-result-updater/vjudge";
 import { CodeforcesResultsDialog } from "./contest-result-updater/codeforces";
 import { AtcoderResultsDialog } from "./contest-result-updater/atcoder";
 
@@ -151,7 +151,9 @@ export async function generateMetadata({
 
   return {
     title: event.title,
-    description: event.description?.replace(/(<([^>]+)>)/gi, '') || `Event details for ${event.title}`,
+    description:
+      event.description?.replace(/(<([^>]+)>)/gi, "") ||
+      `Event details for ${event.title}`,
   };
 }
 
@@ -205,13 +207,13 @@ export default async function EventPage({ params }: EventPageProps) {
         <div className="space-y-8">
           {/* Added: Action buttons section */}
           <div className="flex justify-end gap-4">
-            {event.type === "contest" &&
+            {/* {event.type === "contest" &&
               event.eventLink?.includes("vjudge.net") && (
-                <VjudgeResultsDialog
-                  eventId={event.id}
-                  currentUser={session?.user?.name ?? "guest"}
-                />
-              )}
+                // <VjudgeResultsDialog
+                //   eventId={event.id}
+                //   currentUser={session?.user?.name ?? "guest"}
+                // />
+              )} */}
 
             {event.type === "contest" &&
               event.eventLink?.includes("codeforces.com") && (
