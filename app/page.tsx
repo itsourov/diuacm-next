@@ -123,7 +123,7 @@ const steps = [
   {
     title: "Visit ACM Lab",
     description:
-      "Come to KT_310 to meet the community and get help with your competitive programming journey.",
+      "Come to KT-310 to meet the community and get help with your competitive programming journey.",
     icon: Users,
     color: "text-purple-500",
   },
